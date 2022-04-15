@@ -1,0 +1,1 @@
+$Server::numMasters = "0";

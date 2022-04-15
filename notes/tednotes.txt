@@ -1,0 +1,4 @@
+Terrain Building Notes:
+
+* Terrain size = number of tiles in the terrain tiling
+* Each tile is 8x8 units

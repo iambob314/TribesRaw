@@ -1,0 +1,88 @@
+// --- Inter-server reference ---
+//
+// Communication between servers that are immediately connected is simple: remoteEval() calls can be made to invoke remote procedures.
+// However, for servers separated by 2 or more connections, a more general system is required.
+// The first step is enabling a server to refer to another server somewhere in the network; in order to do this, there must be some sort
+// of naming scheme. First we will examine how each server names its connections, and then how these relative identifiers are put
+// together into absolute network pathnames.
+//
+// The following few sections will refer to these figures:
+
+//----------(Figure 1)----------
+//
+//          |Server A|
+//         1 /      \ 2
+//          /        \ 
+//      .. /          \ ..
+// |Server B|        |Server C|
+//         \ 4
+//          \
+//           \ ..
+//           |Server D|
+//
+//------------------------------
+//
+// -- Local references: connection identifiers --
+//
+// Each connection on a RPGX server is given a unique identifier. These identifiers are relative to the current execution instance
+// of the server:
+//  * The "parent" connection is named "..", or the negative of the parent server's name for this connection
+//  * Each "child" connection is named with a unique positive integer when the connection occurs, starting with "1" and increasing
+//
+// For example, in Figure 1, Server A has two child connections, labeled "1" and "2"; apparently Server B connected before Server C.
+// Server C could refer to its connection to Server A as either ".." or "-2".
+//
+// Also note that Server B's name for its connection to Server D is "4", even though it only has one child server; this was caused
+// by 3 previous connections to Server B, which apparently were all lost, before Server D's current connection was made (perhaps
+// Server D was having connection trouble).
+//
+// -- Global references: network paths --
+//
+// Now that all connections are named relative to each server, we can build another naming system in which each server can refer to any
+// other server on the network in an unambiguous way. This is done using a network path, and there are two types: relative and absolute.
+//
+// - Absolute network paths -
+// Absolute paths uniquely name each server on the network. First, we arbitrarily name the root server "/" (the root is the one server
+// with no parent connection). Then, any other server is identified by a sequence of connections (named as described in the previous
+// section) that must be followed from the root, separated by forward slashes ("/"). Consequently, all absolute network paths begin
+// with a forward slash. They also may not include any parent connections (".." or negative integers). For instance, take the following
+// connection diagram:
+//
+// For example, in Figure 1, the servers have the following absolute network paths:
+// A: "/"
+// B: "/1"
+// C: "/2"
+// D" "/1/4"
+//
+// Also, even though the path "/1/4/.." might seem refer to Server B, it is not a valid absolute network path, because it includes a reference to
+// a parent connection.
+//
+// - Relative network paths -
+//
+// Another type of network path is the relative network path, which specifies the connections that must be traversed to get from the current
+// server to some other server (contrast this with absolute network paths, which specify the path from the root to the other server). Relative
+// network paths are formatted the same as absolute network paths, but do not begin with a forward slash, and may include parent connections
+// (".." or negative integers).
+//
+// For example, in Figure 1, Server B could refer to Server C by either of the following relative network paths:
+//  * "../2"
+//  * "-1/2"
+// and Server D could refer to Server C by any of the following:
+//  * "../../2"
+//  * "../-1/2"
+//  * "-4/../2"
+//  * "../-1/2"
+//
+// Note: reference to a parent connection by the negative integer is only done by the internal network routing code; the parent connection
+//       should always be referred to as ".." in application code.
+//
+// --- Inter-server communication ---
+// Immediately connected servers can communicate via standard remote function calls (remoteEval() calls remoteXXX() on target). For more
+// distanced servers, the new SNet calls are necessary. A server wishing to make a remote function call on another must use the function
+//
+//   nremoteEval(targetAddress, functionName, args ...);
+//
+// This will call the following function on the server:
+//
+//    nremoteFunctionName(returnAddress, args ...);
+//
