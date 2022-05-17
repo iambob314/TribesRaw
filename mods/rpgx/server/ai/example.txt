@@ -1,0 +1,25 @@
+// Prototype guard AI FSM
+
+Guard state:
+  Follow map graph
+  Search for enemies
+  onDamage:
+    Turn around
+  onEnemySighted:
+    Engage
+
+Engage state:
+  if facing me
+    return fire
+    take cover
+  else
+    aim for head, then fire
+
+
+
+
+
+Need state system
+Need periodic scheduling bound to state
+Need event redirection bound to state
+Need scheduling bound to state

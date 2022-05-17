@@ -1,0 +1,1 @@
+$ShadowDetail[Player] = 1;
