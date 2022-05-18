@@ -1,6 +1,7 @@
-exec("stdlib\\sound.cs");
-exec("stdlib\\strings.cs");
-exec("stdlib\\vols.cs");
+exec("std\\util.cs");
+exec("std\\sound.cs");
+exec("std\\strings.cs");
+exec("std\\vols.cs");
 
 // std::initDefaults{Client,Server} load stuff for a default client or (dedicated) server setup.
 // Only load one or the other (not both).
