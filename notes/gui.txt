@@ -1,0 +1,4 @@
+
+Input devices are only attached to client world (can't open tilde terminal for GUI instantiated from server world)
+
+Palette is determined by FearGui::FGPaletteCtrl and its Pal Tag field
