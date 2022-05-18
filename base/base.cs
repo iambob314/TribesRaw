@@ -10,15 +10,14 @@ function init() {
 	$Console::printLevel = 1;
 	$Console::prompt = "$ ";
 	$Console::history = 999;
+	$Console::logBufferEnabled = true;
+	$Console::lastLineTimeout = 0;
+	$Console::GFXFont = "interface.pft";
 	
 	// Parse command line
 	base::parseCArgv();
 	if ($dedicated) {
 		$WinConsoleEnabled = true;
-	} else {
-		$Console::GFXFont = "interface.pft";
-		$Console::logBufferEnabled = true;
-		$Console::lastLineTimeout = 0;
 	}
 
 	// Set up search path
