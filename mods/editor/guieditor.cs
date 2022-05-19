@@ -4,18 +4,16 @@
 // METextEdit
 // MEButton
 // FearGUI::FGPaletteCtrl: force palette (good one = IDPAL_SHELL, use inspector to set)
+// SimGui::ScrollCtrl: scrollbox
+// FearGUI::FGTextList: selection list
 
 $MainWindow = MainWindow;
 
-function newControl(%parent, %name, %className, %pos, %extent) {
-  %x = newObject(%name, %className);
-  addToSet(%parent, %x);
-  Control::setPosition(%name, getWord(%pos, 0), getWord(%pos, 1));
-  Control::setExtent(%name, getWord(%extent, 0), getWord(%extent, 1));
-  return %x;
-}
+//
+// Load/save GUI editor itself
+//
 
-function GuiEditor::load() {
+function GuiEditor::loadEditor() {
   GuiLoadContentCtrl($MainWindow, "temp\\GuiEditor.gui");
   GuiEditMode($MainWindow);
 
@@ -29,12 +27,23 @@ function GuiEditor::load() {
   Control::setValue(GUIFileField, "");
 }
 
-function GuiEditor::save() {
+function GuiEditor::saveEditor() {
   GuiSaveContentCtrl(ToolTrayWindow, "temp\\guiEditorToolTray.gui");
 }
 
+function GuiEditor::editEditor() {
+  GuiEditMode(ToolTrayWindow);
+  GuiInspect(ToolTrayWindow);
+  GuiEditor::openTree();
+  simTreeAddSet(guiEditorTree, "GuiEditorToolTrayGui");
+}
+
+//
+// Load/save a new GUI project
+//
+
 function GuiEditor::newGUI(%guiName, %compType) {
-  while (Group::objectCount("GuiEditorGui") > 0) deleteObject(Group::getObject("GuiEditorGui", 0));
+  while ((%obj = Group::getObject("GuiEditorGui", 0)) != -1) deleteObject(%obj);
 
   %gui = newObject(%guiName @ "Gui", %compType);
 
@@ -42,7 +51,7 @@ function GuiEditor::newGUI(%guiName, %compType) {
 }
 
 function GuiEditor::loadGUI(%file) {
-  while (Group::objectCount("GuiEditorGui") > 0) deleteObject(Group::getObject("GuiEditorGui", 0));
+  while ((%obj = Group::getObject("GuiEditorGui", 0)) != -1) deleteObject(%obj);
 
   %guiName = File::getBase(%file);
   %gui = loadObject(%guiName @ "Gui", %file);
@@ -73,7 +82,9 @@ function GuiEditor::saveGUI(%file) {
   storeObject(%gui, %file, true);
 }
 
-
+//
+// GUI editor functionality (wiring to editor buttons, etc. in next section)
+//
 
 function GuiEditor::openTree() {
   if (isObject(guiEditorTree)) return;
@@ -91,13 +102,21 @@ function GuiEditor::toggleEditMode() {
   GuiEditor::updateEditModeButton();
 }
 
+function newControl(%parent, %name, %className, %pos, %extent) {
+  %x = newObject(%name, %className);
+  addToSet(%parent, %x);
+  Control::setPosition(%name, getWord(%pos, 0), getWord(%pos, 1));
+  Control::setExtent(%name, getWord(%extent, 0), getWord(%extent, 1));
+  return %x;
+}
 
+//
+// GUI controls in editor window
+//
 
 function GuiEditor::updateEditModeButton() {
   Control::setText(GUIEditModeButton, tern(isObject(EditControl), "Enter GUI mode", "Enter EDIT mode"));
 }
-
-
 
 function GUILoadButton::onAction() {
   %file = Control::getValue(GUIFileField);

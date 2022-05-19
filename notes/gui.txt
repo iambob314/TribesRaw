@@ -1,4 +1,8 @@
 
-Input devices are only attached to client world (can't open tilde terminal for GUI instantiated from server world)
+* Input devices are only attached to client world (can't open tilde terminal for GUI instantiated from server world)
 
-Palette is determined by FearGui::FGPaletteCtrl and its Pal Tag field
+* Palette is determined by FearGui::FGPaletteCtrl and its Pal Tag field
+
+* Control::get/setValue seems to only accept object *names*, not *IDs*
+
+* FearGui::FGTextList must be non-empty *and* have its Control::setValue set *before* adding to GUI (it may be cleared afterward, but never edited/moved with the GUI editor while empty)
