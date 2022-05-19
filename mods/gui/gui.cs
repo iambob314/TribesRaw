@@ -16,8 +16,3 @@ function Gui::newWindow(%name, %gui, %title) {
 	
 	return %win;
 }
-
-// Experiments
-focusClient();
-std::initDefaultsClient();
-gui::newWindow();
