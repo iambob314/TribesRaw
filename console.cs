@@ -19,8 +19,6 @@ newObject(ConsoleScheduler, SimConsoleScheduler);
 focusServer();
 newObject(ConsoleScheduler, SimConsoleScheduler);
 
-echo("OLLO");
-
 // Execute base.cs (which provides more init and mod loading support)
 $ConsoleWorld::DefaultSearchPath = "base"; // temporary, to load base
 exec("base.cs");

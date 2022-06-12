@@ -1,13 +1,18 @@
-// initSfx initializes the sound system
-function std::initSfx() {
+// initSfx initializes the sound system (and loads base sound vols)
+function base::initSfx() {
+	// Load base sound vols
+	base::loadSoundVols();
+	base::loadVoiceVols();
+
+	// Initialize the sound system itself
 	newSfx();
 	sfxSetFormat(22050, 16, 1);
-	std::setSfxProfiles();
+	base::setSfxProfiles();
 }
 
 // setSfxProfiles sets up, idk, sound profiles?
 // NOTE: may only call after loading ID string tables.
-function std::setSfxProfiles() {
+function base::setSfxProfiles() {
 	if (IDPRF_2D == 0) {
 		echo("Error: call to setSfxProfiles() before ID string tables were loaded; returning early");
 		trace();

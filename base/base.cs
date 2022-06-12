@@ -1,10 +1,14 @@
 // Barebones bootstrapping for Tribes
 
 function Game::endFrame() {} // it's *really* spammy until we do this
-function exec2(%file) { exec(%file); } // for safely executing a file without allowing it to clobber local variables
 
-// init is called at the end of this file (defined at top here for visibility)
-function init() {
+exec("base_require.cs");
+exec("base_sound.cs");
+exec("base_strings.cs");
+exec("base_vols.cs");
+
+// base::init is called at the end of this file (defined at top here for visibility)
+function base::init() {
 	// Core console variables
 	$Console::logMode = 1;
 	$Console::printLevel = 1;
@@ -16,18 +20,27 @@ function init() {
 	
 	// Parse command line
 	base::parseCArgv();
-	if ($dedicated) {
+	if ($dedicated || $terminal) {
 		$WinConsoleEnabled = true;
 	}
 
 	// Set up search path
-	EvalSearchPath();
+	base::refreshSearchPath();
+
+	// Load core resources
+	base::initStrings();  // load string tables
+	base::loadBaseVols(); // load default vols
 	
 	// Load all mods specified by command line args
 	%modsToLoad = $modList;
-	for (%i = 0; (%modname = getWord(%modsToLoad, %i)) != -1; %i++) RequireMod(%modname);
-	
+	for (%i = 0; (%modname = getWord(%modsToLoad, %i)) != -1; %i++) requireMod(%modname);
+
 	echo("Tribes initialized");
+}
+
+// base::initClient is an optional initializer called for clients (i.e. non-$dedicated instances)
+function base::initClient() {
+	base::initSfx();
 }
 
 // parseCArgv parses command line args into mods list and dedicated server mode/mission
@@ -41,70 +54,21 @@ function base::parseCArgv() {
 		} else if ($cargv[%i] == "-dedicated") {
 			$dedicated = true;
 			$dedicatedMission = $cargv[%i++];
+		} else if ($cargv[%i] == "-terminal") {
+			$terminal = true;
 		} else {
 			$argv[%outIdx++ - 1] = $cargv[%i]; // extract unparsed args for mods to handle
 		}
 	}
 }
 
-// EvalSearchPath just adds the top-level directories to the path. We keep this function
+// base::refreshSearchPath just adds the top-level directories to the path. We keep this function
 // just to refresh for newly-appeared files.
-function EvalSearchPath() {
+function base::refreshSearchPath() {
 	$ConsoleWorld::DefaultSearchPath = "base;config;mods;recordings;temp";
 	echo("Refreshed search path: ", $ConsoleWorld::DefaultSearchPath);
 }
 
-//
-// RequireMod(%modname) - load mod %modname
-//
-// Loading mod %modname:
-// 1) creates %modname\\%modname.vol as SimVolume, if it exists
-// 2) executes %modname\\%modname.cs, if it exists
-//
-// A mod can require another mod by calling RequireMod("othermod);
-// Each mod is only ever loaded once, the first time RequireMod is called.
-//
-// NOTE: We never add mods to the search path; they must always use "modname\\file.cs" paths.
-//
-// Globals:
-// $modList = space-separated list of loaded mods, with each mod's dependencies listed after it
-// $modLoaded["modname"] = true iff modname has been loaded
-// $modLoading["modname"] = true while RequireMod is running; only used to detect cycles, cleaned up afterward
-function RequireMod(%modname) {
-	if ($modLoaded[%modname]) return; // do nothing if already loaded
-	
-	// Sanity check for load cycles
-	if ($modLoading[%modname]) {
-		echo("FATAL ERROR: ", %modname, " was loaded twice in a require cycle! Current $modList: ", $modList);
-		quit();
-	}
-	$modLoading[%modname] = true;
-	echo("Loading mod ", %modname, "...");
-
-	// Add to mod list
-	$modList = $modList @ " " @ %modname;
-	
-	// Create mod volume, if it exists
-	%volfile = %modname @ "\\" @ %modname @ ".vol";
-	if (isFile("mods\\" @ %volfile)) {
-		if (!isObject(ModVolumes)) newObject(ModVolumes, SimGroup);
-		addToSet(ModVolumes, newObject(%modname, SimVolume, %volfile));
-	} else {
-		dbecho(2, "Warning: main volume for mod ", %modname, " (", %volfile, ") not found (this may be intentional)");
-	}
-	
-	// Execute mod script, if it exists
-	%scriptfile = %modname @ "\\" @ %modname @ ".cs";
-	if (isFile("mods\\" @ %scriptfile)) {
-		exec2(%scriptfile);
-	} else {
-		echo("Warning: main script file for mod ", %modname, " (", %scriptfile, ") not found");
-	}
-	
-	// Mark as loaded
-	$modLoading[%modname] = "";
-	$modLoaded[%modname] = true;
-}
-
-// Finally, actually call init()
-init();
+// Finally, actually call base::init (and for clients, also base::initClient)
+base::init();
+if (!$dedicated) base::initClient();
