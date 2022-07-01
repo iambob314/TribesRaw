@@ -1,23 +1,20 @@
-TODO (eventually):
-- Hook up AI::onDamage and AI::onAIKilled from the Player::on* functions
-
-TODO:
-- Build integrated editor GUI (including createObject.gui and inspectObject.gui) so that the various panels can be positioned
-
 General:
-- If the game window won't come up at start, there's probably a syntax error in console.cs. Get the working console.cs and execute broken console.cs from it, to find the error line number.
 - For any tag IDXXX = Y, Z
     - IDXXX == Y
     - *IDXXX == Z
 - "$+" is the same operator as "@"
 
+Gui:
+- IDACTION_MENU_PAGE -> DarkStar calls remoteEval(2048, scoresOn / scoresOff) depending on if scores window is displayed
+- play.gui load -> setCMMode(PlayChatMenu, 0); setCMMode(CommandChatMenu, 0);
+
 Client:
-- Client requires IRCClient to be created, or will crash after connection, immediately after ghosting finishes.
+- Loading play.gui crashes if unless IRCClient exists
 
 Server:
 - Volume file containing the palette cannot be created with a newObject call for some reason; an instant block is necessary. The palette may be constructed with a newObject call, however.
 
+- Client::setGuiMode(%c, 1) -> loadPlayGui(); on client
+
 Focus problems:
-- If focusServer()/focusClient() is called in a remote function when the client is connected to the server via loopback, the focus is not restored when the remote function returns,
-  causing problems when a client is busy connecting (because if the connection finishes when server is focused, the client crashes on spawn), for instance. For this reason, at least
-  in remote functions that could be called while the client is connecting, do not make focus calls (including push*Focus calls)
+- focusClient/focusServer within a remote call during the process of connecting seems to cause a crash later, even if focus is restored before returning from the remote call

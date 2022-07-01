@@ -1,4 +1,5 @@
 // Barebones bootstrapping for Tribes
+// (note: we start and end with server focus)
 
 function Game::endFrame() {} // it's *really* spammy until we do this
 
@@ -66,7 +67,7 @@ function base::parseCArgv() {
 // just to refresh for newly-appeared files.
 function base::refreshSearchPath() {
 	$ConsoleWorld::DefaultSearchPath = "base;config;mods;recordings;temp";
-	echo("Refreshed search path: ", $ConsoleWorld::DefaultSearchPath);
+	//echo("Refreshed search path: ", $ConsoleWorld::DefaultSearchPath);
 }
 
 // Finally, actually call base::init (and for clients, also base::initClient)

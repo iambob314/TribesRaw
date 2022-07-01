@@ -1,5 +1,5 @@
 
-function base::loadBaseVols() {
+function base::loadBaseVols(%noRSP) {
 	addToSet(newObject(StdVolumes, SimGroup),
 		newObject(FontsVolume, SimVolume, "baseres\\core\\fonts.vol"),
 		newObject(DarkstarVolume, SimVolume, "baseres\\core\\darkstar.vol"),
@@ -9,14 +9,17 @@ function base::loadBaseVols() {
 		newObject(EditVolume, SimVolume, "baseres\\core\\edit.vol"),
 		newObject(EditorVolume, SimVolume, "baseres\\core\\editor.vol")
 	);
+	if (!%noRSP) base::refreshSearchPath();
 	return nameToID(StdVolumes);
 }
 
-function base::loadSoundVols() {
-	return newObject(SoundVolume, SimVolume, "baseres\\sound\\sound.vol");
+function base::loadSoundVols(%noRSP) {
+	%vol = newObject(SoundVolume, SimVolume, "baseres\\sound\\sound.vol");
+	if (!%noRSP) base::refreshSearchPath();
+	return %vol;
 }
 
-function base::loadVoiceVols() {
+function base::loadVoiceVols(%noRSP) {
 	%voices = newObject(VoiceVolumes, SimGroup);
 	%pat = "baseres\\voices\\*.vol";
 	for (%volfile = File::findFirst(%pat); %volfile != ""; %volfile = File::findNext(%pat)) {
@@ -24,5 +27,6 @@ function base::loadVoiceVols() {
 		%vol = newObject(%volname, SimVolume, %volfile);
 		addToSet(%voices, %vol);
 	}
+	if (!%noRSP) base::refreshSearchPath();
 	return %voices;
 }

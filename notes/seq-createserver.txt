@@ -1,0 +1,2 @@
+newObject(<objname>, FearCSDelegate, true <isServer>, "IP" <proto>, 28001 <port>, ... <proto, port>) ->
+  checkMasterTranslation()
