@@ -8,6 +8,9 @@ Gui:
 - IDACTION_MENU_PAGE -> DarkStar calls remoteEval(2048, scoresOn / scoresOff) depending on if scores window is displayed
 - play.gui load -> setCMMode(PlayChatMenu, 0); setCMMode(CommandChatMenu, 0);
 
+Network:
+- LOOPBACK does not work when serverDelegate is created before clientDelegate (clientDelegate overwrites the serverDelegate as receiving endpoint in that case)
+
 Client:
 - Loading play.gui crashes if unless IRCClient exists
 

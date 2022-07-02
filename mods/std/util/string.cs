@@ -13,8 +13,8 @@ function String::length(%str) {
 }
 
 function String::substr(%s, %off, %len) {
-	%off = defval(%off, 0);
-	%len = defval(%len, 1<<16);
+	%off = def(%off, 0);
+	%len = def(%len, 1<<16);
 	return String::getSubStr(%s, %off, %len);
 }
 
@@ -37,4 +37,17 @@ function String::escape(%str) {
 	%str = String::getSubStr(%str, %idx+4, %l);
   }
   return %outstr @ %str;
+}
+
+function String::stripSuffix(%s, %suff) {
+	%l = String::length(%s);
+	%suffL = String::length(%suff);
+	if (%suffL > %l) return %s;
+	
+	%preL = %l - %suffL;
+	
+	if (String::substr(%s, %preL, %suffL) == %suff)
+		return String::substr(%s, 0, %preL);
+	else
+		return %s;
 }

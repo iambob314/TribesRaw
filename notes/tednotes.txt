@@ -2,3 +2,9 @@ Terrain Building Notes:
 
 * Terrain size = number of tiles in the terrain tiling
 * Each tile is 8x8 units
+
+* Ted::setFlags is super buggy
+  * called without arg = popup
+  * with arg seems to only accept a single value (bug at https://github.com/AltimorTASDK/TribesRebirth/blob/1105fd0890c19c13f816b91e51b9cf0658ffc63c/darkstar/Ted/Code/tedPlugin.cpp#L888), which is one of:
+    https://github.com/AltimorTASDK/TribesRebirth/blob/1105fd0890c19c13f816b91e51b9cf0658ffc63c/darkstar/Ted/Code/tedPlugin.cpp#L737
+	rotate flipx flipy empty1 empty2 empty3 corner edit

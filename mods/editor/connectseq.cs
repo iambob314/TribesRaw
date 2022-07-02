@@ -50,4 +50,6 @@ function onClientGhostAlwaysDone() {
 function onServerGhostAlwaysDone(%clientId) { echo("onServerGhostAlwaysDone ", %clientId); }
 function remoteCGADone(%clientId) {
 	echo("remoteCGADone ", %clientId);
+	
+	Editor::spawn(%clientId);
 }
