@@ -1,1 +1,0 @@
-My new approach to defining tags seems to have failed, because some tags require specific numbers, because the Tribes/DarkStar engine accesses them as integers, rather than by their tag names. Oh well :(.
