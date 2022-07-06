@@ -4,6 +4,7 @@
 function Game::endFrame() {} // it's *really* spammy until we do this
 
 exec("base_require.cs");
+exec("base_consts.cs");
 exec("base_sound.cs");
 exec("base_strings.cs");
 exec("base_vols.cs");
@@ -30,6 +31,7 @@ function base::init() {
 
 	// Load core resources
 	base::initStrings();  // load string tables
+	base::initConsts();   // load const vars (intrinsic Tribes/DarkStar/Fear values)
 	base::loadBaseVols(); // load default vols
 	
 	// Load all mods specified by command line args
