@@ -44,6 +44,9 @@ function onClientGhostAlwaysDone() {
 	flushTextureCache(); // ??? probably just needed for rebuildCommandMap
 	purgeResources(true);
 	remoteEval(2048, CGADone);
+	
+	if ($Editor::isLoopback) Editor::initMELoopback();
+	else                     Editor::initMERemote();
 }
 
 // Server (done)

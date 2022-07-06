@@ -6,7 +6,6 @@ function onClientJoin(%clientId) { echo("onClientJoin ", %clientId); }
 function onClientDrop(%clientId) { echo("onClientDrop ", %clientId); }
 function onClientChangeTeam(%clientId, %team) { echo("onClientChangeTeam ", %clientId, " ", %team);}
 
-
 // Client <- Server's Client::setGuiMode(%clientId, 1)
 function loadPlayGui() {
 	if (File::FindFirst("play.gui") != "")
