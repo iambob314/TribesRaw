@@ -11,47 +11,32 @@ exec("editor\\serverevents.cs");
 
 exec("editor\\newmission.cs");
 
-function checkMasterTranslation() {} // called periodically after newObject(..., FearCSDelegate, true);
+function checkMasterTranslation() {} // called periodically after newObject(..., FearCSDelegate, true); TODO: implement for real
 
 function Editor::createServer(%port) {
-	$Server::Port = 28001;
-	if (%port != "") $Server::Port = %port;
+	// Create serverDelegate (server socket, etc.)
+	if (%port != "") %port = 28001;
+	newObject(serverDelegate, FearCSDelegate, true, "IP", %port, "IPX", %port, "LOOPBACK", %port);
 
-	newObject(serverDelegate, FearCSDelegate, true, "IP", $Server::Port, "IPX", $Server::Port, "LOOPBACK", $Server::Port);
-
+	// TODO: better VOL loading routine (need RPG vols, etc.)
 	newObject(EntitesVolume, SimVolume, "baseres\\shapes\\Entities.vol");
 	base::refreshSearchPath();
-	
+
+	// Load datablocks
 	exec("editor\\armor.cs");
-	
 	preloadServerDataBlocks();
 
+	// Reset managers
 	resetSimTime();
 	resetPlayerManager();
 	resetGhostManagers();
-	
-	newObject(MissionCleanup, SimGroup); // required: magic group name, used by DarkStar for projectiles, AI::Object, etc.
-
 	purgeResources(true);
 	
-	// TODO: move barebones world to elsewhere
+	// Create/load world
 	setInstantGroup(0);
 	Editor::newMission(testmis, lush, 1, true, 64, 123);
 	//exec("testmis.mis");
-	// instant SimGroup "MissionGroup" {
-	// instant SimVolume "lushWorld" {
-		// fileName = "baseres\\world\\lushWorld.vol";
-	// };
-	// instant SimVolume "lushTerrain" {
-		// fileName = "baseres\\world\\lushTerrain.vol";
-	// };
-	// instant SimVolume "lushDML" {
-		// fileName = "baseres\\world\\lushDML.vol";
-	// };
-	// instant SimPalette "Palette" {
-		// fileName = "lush.day.ppl";
-	// };
-	// };
+	newObject(MissionCleanup, SimGroup); // required: magic group name, used by DarkStar for projectiles, AI::Object, etc.
 }
 
 function Editor::preparePlayGui() {
@@ -63,10 +48,12 @@ function Editor::preparePlayGui() {
 
 function Editor::createClient() {
 	Editor::preparePlayGui();
+	GUI::newWindow(MainWindow, "mainmenu.gui");
 
-	exec(controls);
-	newObject(EntitesVolume, SimVolume, "baseres\\shapes\\Entities.vol");
-	base::refreshSearchPath();
+	//newObject(EntitesVolume, SimVolume, "baseres\\shapes\\Entities.vol");
+	//base::refreshSearchPath();
+
+	exec("editor\\controls.cs");
 
 	newObject(clientDelegate, FearCSDelegate, false, "IP", 0, "IPX", 0, "LOOPBACK", 0);
 	//translateMasters(); // ???
@@ -74,7 +61,6 @@ function Editor::createClient() {
 
 function Editor::clientConnect(%hostname) {
 	purgeResources();
-	$Server::Address = %hostname;
 	connect(%hostname);
 }
 
@@ -89,10 +75,6 @@ function Editor::spawn(%clientId) {
 }
 
 focusClient();	
-GUI::newWindow();
-GuiLoadContentCtrl(MainWindow, "mainmenu.gui");
-flushTextureCache();
-	
 Editor::createClient(); // required: must create clientDelegate BEFORE serverDelegate, or LOOPBACK does not work
 
 // Experiments

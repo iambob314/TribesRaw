@@ -6,7 +6,11 @@ function Gui::newWindow(%name, %gui, %title) {
 	inputActivate(keyboard0);
 	inputActivate(mouse0);
 
-	GuiNewContentCtrl(%win, SimGui::BitmapCtrl);
+	if (%gui == "")
+		GuiNewContentCtrl(%win, SimGui::BitmapCtrl);
+	else
+		GuiLoadContentCtrl(%win, "mainmenu.gui");
+	
 	setCursor(%win, "Cur_Arrow.bmp");
 	cursorOn(%win);
 
