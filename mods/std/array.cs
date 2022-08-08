@@ -11,24 +11,43 @@
 //
 // N.B.: *always* clean up unused arrays using adel, as otherwise they will accumulate indefinitely.
 //
-// Storage for array %X:
-// $a[%X] = len;  // if "", then array is unused
-// $a[%X, ""] = cur idx (for iteration)
-// $a[%X, %i] = %i'th value;
+// Functions (all take optional final arg. for array name, or none for default array):
+// * alen()       : length
+// * adel()       : delete array
+// * aget(%i)     : get element %i
+// * aset(%i,%v)  : set element %i to %v
+// * aclr(%i)     : clear element %i
+// * aswap(%i,%j) : swap elements %i and %j
+// * apush(%v)    : append %v as last
+// * apop()       : pop last
+//
+// * acompact()   : shift non-"" elements left to replace "" elements
+// * asort()      : sort array
+// * astr()       : stringify array (space-separated elements)
+//
+// * aitfirst()   : start iteration, return first
+// * aitnext()    : continue iteration, return next
+// * aitdone()    : is iteration done?
+// * ait()        : iteration next index
+//
+// Internal storage for array %X:
+// $_a[%X] = len;  // if "", then array is unused
+// $_a[%X, ""] = cur idx (for iteration)
+// $_a[%X, %i] = %i'th value;
 //
 
-function alen(%a) { return def($a[%a], 0); }
+function alen(%a) { return def($_a[%a], 0); }
 
 // aget gets the value at an array index (or "" if invalid index)
 function aget(%i, %a) {
 	if ((%i = aidx(%i, %a)) == "") return "";
-	return $a[%a, %i];
+	return $_a[%a, %i];
 }
 
 // aset sets the value at an array index (cannot set past end of array; no-op if invalid index)
 function aset(%i, %v, %a) {
 	if ((%i = aidx(%i, %a)) != "")
-		return $a[%a, %i];
+		return $_a[%a, %i];
 }
 
 // adel clears a value at an array index to ""; equivalent to aset(%i, "", %a)
@@ -37,21 +56,30 @@ function aclr(%i, %a) { aset(%i, "", %a); }
 // aswap swaps two elements in an array (no-op if invalid either index is invalid)
 function aswap(%i, %j, %a) {
 	if ((%i = aidx(%i, %a)) == "" || (%j = aidx(%j, %a)) == "" || %i == %j) return;
-	%tmp = $a[%a, %i];
-	$a[%a, %i] = $a[%a, %j];
-	$a[%a, %j] = %tmp;
+	%tmp = $_a[%a, %i];
+	$_a[%a, %i] = $_a[%a, %j];
+	$_a[%a, %j] = %tmp;
 }
 
 // apush appends a new last element to an array
 function apush(%v, %a) {
-	$a[%a, $a[%a]++ - 1] = %v;
+	$_a[%a, $_a[%a]++ - 1] = %v;
 }
 
 // apop removes and returns the last element of an array (or "" if empty)
 function apop(%a) {
 	if (alen(%a) == 0) return "";
-	%v = $a[%a, $a[%a]--];
+	%v = $_a[%a, $_a[%a]--];
 	return %v;
+}
+
+// afind finds value %v in an array, returning its index or -1 if not found
+function afind(%v, %a) {
+	%l = alen(%a);
+	for (%i = 0; %i < %l; %i++)
+		if (aget(%i, %a) == %v)
+			return %i;
+	return -1;
 }
 
 
@@ -60,30 +88,30 @@ function apop(%a) {
 // Note: only one iteration may be active on an array at a time; code iterating should be careful that a called
 //       function does not inadvertently clobber the iterator.
 function aitfirst(%a) {
-	$a[%a, ""] = "";
+	$_a[%a, ""] = "";
 	return aget(ait(%a), %a);
 }
 
 // aitnext advances an array's iterator and returns the new value (no-op if iteration is done)
 function aitnext(%a) {
-	if (aitdone(%a)) return;
-	$a[%a, ""]++;
+	if (aitdone(%a)) return "";
+	$_a[%a, ""]++;
 	return aget(ait(%a), %a);
 }
 
-// aitdone returns true iff an array's iterator is is at the end if the array
+// aitdone returns true iff after aitfirst/aitnext has stepped past the end of the iterator
 function aitdone(%a) { return ait(%a) == alen(%a); }
 
 // ait returns current index of the active iterator (or 0 if none active)
-function ait(%a) { return def($a[%a, ""], 0); }
+function ait(%a) { return def($_a[%a, ""], 0); }
 
 
 
 // adel deletes an entire array
 function adel(%a) {
 	%l = alen(%a);
-	for (%i = 0; %i < %l; %i++) $a[%a, %i] = "";
-	$a[%a] = "";
+	for (%i = 0; %i < %l; %i++) $_a[%a, %i] = "";
+	$_a[%a] = "";
 }
 
 // acompact "compacts" an array, removing all "" values by shifting non-"" values left to fill
@@ -96,7 +124,7 @@ function acompact(%a) {
 			%nl++;
 		}
 	}
-	$a[%a] = %nl;
+	$_a[%a] = %nl;
 }
 
 // asort sorts an array
