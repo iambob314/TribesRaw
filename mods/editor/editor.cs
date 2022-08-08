@@ -10,7 +10,10 @@ exec("editor\\clientevents.cs");
 exec("editor\\serverevents.cs");
 
 exec("editor\\gui.cs");
+exec("editor\\shapelist.cs");
 exec("editor\\newmission.cs");
+
+exec("editor\\editorcontrols.cs");
 
 function checkMasterTranslation() {} // called periodically after newObject(..., FearCSDelegate, true); TODO: implement for real
 
@@ -32,27 +35,25 @@ function Editor::initServer(%port) {
 	resetPlayerManager();
 	resetGhostManagers();
 	purgeResources(true);
-	
+
 	// Create/load world
 	setInstantGroup(0);
 	Editor::newMission(testmis, lush, 1, true, 64, 123);
-	//exec("testmis.mis");
+	
 	newObject(MissionCleanup, SimGroup); // required: magic group name, used by DarkStar for projectiles, AI::Object, etc.
 }
 
-function Editor::preparePlayGui() {
-	newObject(EntitesVolume, SimVolume, "baseres\\gui\\gui.vol");
+function Editor::initClient() {
+	// Prepare play.gui
+	newObject(GuiVolume, SimVolume, "baseres\\gui\\gui.vol");
 	newObject("", IRCClient); // required: crash on load play.gui otherwise
 	newObject(PlayChatMenu, ChatMenu, "Root Menu:"); // required: DarkStar calls setCMMode(PlayChatMenu, 0); on load play.gui
 	newObject(CommandChatMenu, ChatMenu, "Command Menu"); // required: DarkStar calls setCMMode(PlayChatMenu, 0); on load play.gui
-}
-
-function Editor::initClient() {
-	Editor::preparePlayGui();
+	
+	// Load other vols
+	newObject(EntitiesVolume, SimVolume, "baseres\\shapes\\entities.vol"); // required: vols with DTS must be explicitly loaded, don't sync from instant group it seems
+	
 	GUI::newWindow(MainWindow, "mainmenu.gui");
-
-	//newObject(EntitesVolume, SimVolume, "baseres\\shapes\\Entities.vol");
-	//base::refreshSearchPath();
 
 	newObject(clientDelegate, FearCSDelegate, false, "IP", 0, "IPX", 0, "LOOPBACK", 0);
 	//translateMasters(); // ???
@@ -64,28 +65,23 @@ function Editor::clientConnect(%hostname) {
 }
 
 function Editor::initMERemote() {
-	
+	exec("editor\\controls.cs");
 }
 
 function Editor::initMELoopback() {
-	exec("editor\\controls.cs");
-	
-	// ME init
+	// ME + editCamera init
 	ME::Create(MainWindow);
+
+	exec("editor\\controls.cs");
 	newObject(editCamera, EditCamera, "editor.sae");
+	$ME::camera = editCamera; // required: used by DarkStar internally
 	
-	ME::SetGrabMask( ~( $ObjectType::Terrain | $ObjectType::Container | $ME::SimDefaultObject ) ); // all but SimTerrain, SimContainerObject, SimDefaultObject
-	ME::SetDefaultPlaceMask( $ObjectType::Terrain | $ObjectType::Interior );
-
-	// $ME::camera = editCamera; ???
-	// $ME::Mod1 = false;		// control ???
-	// $ME::Mod2 = false;		// shift ???
-	// $ME::Mod3 = false;		// alt ???
-
-	// TODO: init "special" $ME vars and call ME::GetConsoleOptions()
-
+	// Set up ME modes/variables
+	ME::SetGrabMask(~($ObjectType::Terrain | $ObjectType::Container | $ME::SimDefaultObject));
+	ME::SetDefaultPlaceMask($ObjectType::Terrain | $ObjectType::Interior);
 	$ME::MoveSensitivity 	= 0.2;
 	$ME::RotateSensitivity 	= 0.02;
+	// TODO: init other "special" $ME vars and call ME::GetConsoleOptions()
 	
 	// TED init (TODO: crashy because missing TED config funcs/vars probably)
 	//Ted::initTed();

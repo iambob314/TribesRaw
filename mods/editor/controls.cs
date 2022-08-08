@@ -13,7 +13,7 @@ bindCommand(keyboard0, make, shift, "f3", TO, "CmdInventoryGui::buyFavorites(3);
 bindCommand(keyboard0, make, shift, "f4", TO, "CmdInventoryGui::buyFavorites(4);");
 bindCommand(keyboard0, make, shift, "f5", TO, "CmdInventoryGui::buyFavorites(5);");
 bindCommand(keyboard0, make, "f1", TO, "remoteEval(2048, PlayMode);");
-bindCommand(keyboard0, make, "f5", TO, "EditorUI::show();");
+bindCommand(keyboard0, make, "f5", TO, "EditorUI::showMode();");
 bindCommand(keyboard0, make, "o", TO, "remoteEval(2048, ToggleObjectivesMode);");
 bindCommand(keyboard0, make, "i", TO, "remoteEval(2048, ToggleInventoryMode);");
 bindCommand(keyboard0, make, "c", TO, "remoteEval(2048, ToggleCommandMode);");

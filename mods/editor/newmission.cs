@@ -8,6 +8,12 @@ function Editor::loadOtherWorldVols(%set, %worldType) {
 		%dmlName = String::stripSuffix(%dml, ".vol");
 		addToSet(%set,	newObject(%dmlName, SimVolume, %worldVolPath @ %dml));
 	}
+	
+	// If the rpgres mod exists, load vols from there TODO: unhackify
+	for (%v = File::findFirst("rpgres\\*.vol"); %v != ""; %v = File::findNext("rpgres\\*.vol")) {
+		%volName = String::stripSuffix(File::getBase(%v), ".vol");
+		addToSet(%set,	newObject(%volName, SimVolume, %v));
+	}
 }
 
 //

@@ -5,28 +5,44 @@ $EditorUI::ModeTED = 3;
 
 $EditorUI::lastMode = $EditorUI::ModeCreate;
 
-function EditorUI::show(%mode) {
+// Top-level UI modes
+
+function EditorUI::showMode(%mode) {
+	EditorUI::show(); // ensure editor GUI is up in general
+
 	if (%mode == "") %mode = $EditorUI::lastMode;
-
-	EditorUI::focus(%mode);
-
-	Control::setVisible("MEObjectList", %mode == $EditorUI::ModeCreate || %mode == $EditorUI::ModeInspect);
+	
+	%showObjList = %mode == $EditorUI::ModeCreate || %mode == $EditorUI::ModeInspect;
+	
+	Control::setVisible("MEObjectList", %showObjList);
 	Control::setVisible("Inspector", %mode == $EditorUI::ModeInspect);
 	Control::setVisible("Creator", %mode == $EditorUI::ModeCreate);
 	Control::setVisible("TedBar", %mode == $EditorUI::ModeTED);
 	Control::setVisible("SaveBar", %mode != $EditorUI::ModeCamera);
 	// Control::setVisible("AddVolume", false); // TODO: is this useful? (dialog to add vol file)
 
-	// TODO: move to Group/NameList refresh funcs
-	TextList::clear("GroupList");
-	TextList::clear("NameList");
+	$EditorUI::lastMode = %mode;
+}
+
+function EditorUI::show() {
+	if (isObject(EditorGui)) return; // already shown
+
+	GuiLoadContentCtrl(MainWindow, "gui\\editor.gui");
+	EditorUI::focus(%mode);
+
+	EditorUI::refreshCreator();
+	EditorUI::refreshMisObjList();
+	EditorUI::refreshTED();
+}
+
+function EditorUI::hide() {
+	if (!isObject(EditorGui)) return; // already hidden
 	
-	if (%mode == $EditorUI::ModeTED) EditorUI::refreshTEDUI();
+	GuiLoadContentCtrl(MainWindow, "gui\\play.gui");
+	EditorUI::unfocus();
 }
 
 function EditorUI::focus(%mode) {
-	if (!isObject(EditorGui)) GuiLoadContentCtrl(MainWindow, "gui\\editor.gui");
-	
 	unfocus(playDelegate);
 	if (%mode != $EditorUI::ModeTED) {
 		unfocus(TedObject);
@@ -41,8 +57,6 @@ function EditorUI::focus(%mode) {
 }
 
 function EditorUI::unfocus() {
-	if (!isObject(playGui)) GuiLoadContentCtrl(MainWindow, "gui\\play.gui");
-
 	unfocus(TedObject);
 	unfocus(MissionEditor);
 	unfocus(editCamera);
@@ -50,7 +64,32 @@ function EditorUI::unfocus() {
 	cursorOff(MainWindow);
 }
 
-function EditorUI::refreshTEDUI() {
+function EditorUI::getActiveMode() {
+	if (isObject(EditorGui)) return $EditorUI::lastMode;
+	else return "";
+}
+
+// Refresh lists
+
+function EditorUI::refreshCreator() {
+	TextList::clear(GroupList);
+	TextList::clear(NameList);
+	
+	for (%group = aitfirst(ME::objgroups); !aitdone(ME::objgroups); %group = aitnext(ME::objgroups))
+		TextList::addLine(GroupList, %group);
+}
+
+function EditorUI::refreshMisObjList() {
+	MissionObjectList::ClearDisplayGroups();
+	MissionObjectList::AddDisplayGroup(1, "MissionGroup");
+	MissionObjectList::AddDisplayGroup(1, "MissionCleanup");
+	MissionObjectList::SetSelMode(1);
+	
+	if ($ME::InspectObject != "")
+		MissionObjectList::Inspect($ME::InspectWorld, $ME::InspectObject);
+}
+
+function EditorUI::refreshTED() {
 	return;
 	// TODO: all of this is straight copied from MEShowTed(); it's junky and references $TED vars we haven't defined
 	
@@ -110,4 +149,134 @@ function EditorUI::refreshTEDUI() {
 	  
 	MESetupTedButton( TEDProcessAction, "" );
 	Control::setText( TEDProcessAction, " -- Selection Action --" );
+}
+
+// GUI controls
+
+function GroupList::onAction() {
+	TextList::clear(NameList);
+	%group = Control::getValue(GroupList);
+
+	%namesArr = "ME::objgroup_" @ %group @ "::names";
+	for (%name = aitfirst(%namesArr); !aitdone(%namesArr); %name = aitnext(%namesArr))
+		TextList::AddLine(NameList, %name);
+}
+
+function NameList::onAction() {
+	%group = Control::getValue(GroupList);
+	%name = Control::getValue(NameList);
+	%namesArr = "ME::objgroup_" @ %group @ "::names";
+	%scriptsArr = "ME::objgroup_" @ %group @ "::scripts";
+
+	%idx = afind(%name, %namesArr);
+	if (%idx == -1)
+		echos("ohnoes", %group, %name);
+
+	%script = aget(%idx, %scriptsArr);
+	echos("TODO", %idx, %name, %script);
+	%x = eval(%script);
+	echo(%x);
+}
+
+// Note: MissionObjectList::on* are more than GUI functions: ME itself calls these selecting
+// objects in the world, and they must update/call all of these for ME to work right:
+// * MissionObjectList::Inspect
+// * $ME::Inspect*
+// * and ME::on*
+
+function MissionObjectList::onUnselected(%world, %obj) {
+	if (%obj == $ME::InspectObject && %world == $ME::InspectWorld) {
+		MissionObjectList::Inspect(1, -1);
+		$ME::InspectObject = "";
+	}
+	ME::onUnselected(%world, %obj);
+}
+
+function MissionObjectList::onSelectionCleared() {
+	MissionObjectList::Inspect(1, -1);
+	$ME::InspectObject = "";
+	ME::onSelectionCleared();
+}
+
+function MissionObjectList::onSelected(%world, %obj) {
+	if ($ME::InspectObject == "") {
+		$ME::InspectObject = %obj;
+		$ME::InspectWorld = %world;
+		MissionObjectList::Inspect($ME::InspectWorld, %obj);
+
+		// grab .locked from server
+		focusServer(); %locked = %obj.locked; focusClient();
+		Control::setText("LockButton", tern(%locked, "Unlock", "Lock"));
+	}
+	ME::onSelected(%world, %obj);
+}
+
+function ApplyButton::onAction() { MissionObjectList::Apply(); }
+
+function LockButton::onAction() {
+	if ($ME::InspectObject == "") return;
+
+	%obj = $ME::InspectObject;
+	focusServer(); %locked = %obj.locked = !%obj.locked; focusClient();
+	Control::setText("LockButton", tern(%locked, "Unlock", "Lock"));
+
+	MissionObjectList::Inspect($ME::InspectWorld, $ME::InspectObject); // refresh inspector
+}
+
+function EditorUI::hideOptions() {
+	if (Control::getVisible("OptionsCtrl")) {
+		Control::setVisible("OptionsCtrl", false);
+		ME::GetConsoleOptions();
+	}
+	if (Control::getVisible("TedOptionsCtrl")) {
+		Control::setVisible("TedOptionsCtrl", false);
+		Ted::GetConsoleOptions();
+		// Control::setText(SeedTerrain, "Gen: " @ $ME::terrainSeed); TODO: why?
+	}
+}
+
+function EditorUI::showOptions() {
+	EditorUI::hideHelp();
+
+	%mode = EditorUI::getActiveMode();
+	if (%mode == $EditorUI::ModeCreate || %mode == $EditorUI::ModeInspect) {
+		Control::setVisible(OptionsCtrl, true);
+
+		Control::setValue(MEUsePlaneMovement, $ME::UsePlaneMovement);
+		Control::setActive(RotationSnapCtrl, $ME::SnapRotations);
+		Control::setActive(XGridSnapCtrl, $ME::SnapToGrid);
+		Control::setActive(YGridSnapCtrl, $ME::SnapToGrid);
+		Control::setActive(ZGridSnapCtrl, $ME::SnapToGrid);
+		Control::setActive(UseTerrainGrid, $ME::SnapToGrid);
+	} else if (%mode == $EditorUI::ModeTED) {
+		Control::setVisible(TedOptionsCtrl, true);
+		Control::setValue(TerrainSeedText, $ME::terrainSeed);
+	}
+}
+
+function EditorUI::toggleOptions() {
+	%mode = EditorUI::getActiveMode();
+	if (%mode == $EditorUI::ModeCreate || %mode == $EditorUI::ModeInspect)
+		%optionsCtrl = OptionsCtrl;
+	else if (%mode == $EditorUI::ModeTED)
+		%optionsCtrl = TedOptionsCtrl;
+      
+	if (Control::getVisible(%optionsCtrl)) EditorUI::hideOptions();
+	else EditorUI::showOptions();
+}
+
+//-----------------------------------------------------
+
+function EditorUI::hideHelp() {
+	Control::setVisible(HelpCtrl, false );
+}
+
+function EditorUI::showHelp() {
+	EditorUI::hideOptions();
+	Control::setVisible(HelpCtrl, true);
+}
+
+function EditorUI::toggleHelp() {
+   if (Control::getVisible(HelpCtrl)) EditorUI::hideHelp();
+   else EditorUI::showHelp();
 }
