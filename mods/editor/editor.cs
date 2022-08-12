@@ -6,8 +6,6 @@ requireMod(std);
 requireMod(gui);
 
 exec("editor\\connectseq.cs");
-exec("editor\\clientevents.cs");
-exec("editor\\serverevents.cs");
 
 exec("editor\\gui\\gui.cs");
 exec("editor\\shapelist.cs");
