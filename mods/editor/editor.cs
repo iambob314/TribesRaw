@@ -9,7 +9,7 @@ exec("editor\\connectseq.cs");
 exec("editor\\clientevents.cs");
 exec("editor\\serverevents.cs");
 
-exec("editor\\gui.cs");
+exec("editor\\gui\\gui.cs");
 exec("editor\\shapelist.cs");
 exec("editor\\newmission.cs");
 
