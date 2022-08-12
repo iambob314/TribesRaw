@@ -1,30 +1,28 @@
-$EditorUI::ModeCamera = 0;
-$EditorUI::ModeCreate = 1;
-$EditorUI::ModeInspect = 2;
-$EditorUI::ModeTED = 3;
-
-$EditorUI::lastMode = $EditorUI::ModeCreate;
+// Editor modes: camera create inspect ted
+$EditorUI::mode = "create"; // current mode, or last used mode if not in editor UI
 
 // Top-level UI modes
 
-function EditorUI::showMode(%mode) {
-	EditorUI::show(); // ensure editor GUI is up in general
-
-	if (%mode == "") %mode = $EditorUI::lastMode;
-	
-	%showObjList = %mode == $EditorUI::ModeCreate || %mode == $EditorUI::ModeInspect;
-	
-	Control::setVisible("MEObjectList", %showObjList);
-	Control::setVisible("Inspector", %mode == $EditorUI::ModeInspect);
-	Control::setVisible("Creator", %mode == $EditorUI::ModeCreate);
-	Control::setVisible("TedBar", %mode == $EditorUI::ModeTED);
-	Control::setVisible("SaveBar", %mode != $EditorUI::ModeCamera);
-	// Control::setVisible("AddVolume", false); // TODO: is this useful? (dialog to add vol file)
-
-	$EditorUI::lastMode = %mode;
+function EditorUI::getMode() {
+	if (isObject(EditorGui)) return $EditorUI::mode;
+	else return "";
 }
 
-function EditorUI::show() {
+function EditorUI::showMode(%mode) {
+	if (%mode == "") %mode = $EditorUI::mode;
+	$EditorUI::mode = %mode;
+
+	EditorUI::show(%mode); // enter editor UI if needed
+
+	Control::setVisible("MEObjectList", %mode == "create" || || %mode == "inspect");
+	Control::setVisible("Inspector", %mode == "inspect");
+	Control::setVisible("Creator", %mode == "create");
+	Control::setVisible("TedBar", %mode == "ted");
+	Control::setVisible("SaveBar", %mode != "camera");
+	// Control::setVisible("AddVolume", false); // TODO: is this useful? (dialog to add vol file)
+}
+
+function EditorUI::show(%mode) {
 	if (isObject(EditorGui)) return; // already shown
 
 	GuiLoadContentCtrl(MainWindow, "gui\\editor.gui");
@@ -44,12 +42,12 @@ function EditorUI::hide() {
 
 function EditorUI::focus(%mode) {
 	unfocus(playDelegate);
-	if (%mode != $EditorUI::ModeTED) {
-		unfocus(TedObject);
-		focus(MissionEditor);
-	} else {
+	if (%mode == "ted") {
 		unfocus(MissionEditor);
 		focus(TedObject);
+	} else {
+		unfocus(TedObject);
+		focus(MissionEditor);
 	}
 	focus(editCamera);
 	postAction(EditorGui, Attach, editCamera);
@@ -62,11 +60,6 @@ function EditorUI::unfocus() {
 	unfocus(editCamera);
 	focus(playDelegate);
 	cursorOff(MainWindow);
-}
-
-function EditorUI::getActiveMode() {
-	if (isObject(EditorGui)) return $EditorUI::lastMode;
-	else return "";
 }
 
 // Refresh lists
@@ -238,8 +231,8 @@ function EditorUI::hideOptions() {
 function EditorUI::showOptions() {
 	EditorUI::hideHelp();
 
-	%mode = EditorUI::getActiveMode();
-	if (%mode == $EditorUI::ModeCreate || %mode == $EditorUI::ModeInspect) {
+	%mode = EditorUI::getMode();
+	if (%mode == "create" || %mode == "inspect") {
 		Control::setVisible(OptionsCtrl, true);
 
 		Control::setValue(MEUsePlaneMovement, $ME::UsePlaneMovement);
@@ -248,17 +241,17 @@ function EditorUI::showOptions() {
 		Control::setActive(YGridSnapCtrl, $ME::SnapToGrid);
 		Control::setActive(ZGridSnapCtrl, $ME::SnapToGrid);
 		Control::setActive(UseTerrainGrid, $ME::SnapToGrid);
-	} else if (%mode == $EditorUI::ModeTED) {
+	} else if (%mode == "ted") {
 		Control::setVisible(TedOptionsCtrl, true);
 		Control::setValue(TerrainSeedText, $ME::terrainSeed);
 	}
 }
 
 function EditorUI::toggleOptions() {
-	%mode = EditorUI::getActiveMode();
-	if (%mode == $EditorUI::ModeCreate || %mode == $EditorUI::ModeInspect)
+	%mode = EditorUI::getMode();
+	if (%mode == "create" || %mode == "inspect")
 		%optionsCtrl = OptionsCtrl;
-	else if (%mode == $EditorUI::ModeTED)
+	else if (%mode == "ted")
 		%optionsCtrl = TedOptionsCtrl;
       
 	if (Control::getVisible(%optionsCtrl)) EditorUI::hideOptions();
