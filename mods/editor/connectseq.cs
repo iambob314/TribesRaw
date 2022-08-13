@@ -1,13 +1,10 @@
 // CONNECTION SEQUENCE
 
 // Server
-function Server::onClientConnect(%clientId) {
-	echo("Server::onClientConnect ", %clientId);
-}
+function Server::onClientConnect(%clientId) {}
 
 // Client
 function onConnection(%message) {
-   echo("onConnection ", %message);
    if (%message == "Accepted") {
 	   resetSimTime();
 	   resetPlayDelegate();
@@ -17,31 +14,26 @@ function onConnectionError(%server, %b, %c) {
   echo("onConnectionError ", %server, " ", %b, " ", %c);
 }
 
-function dataGotBlock(%name, %pct) {
-	echo("dataGotBlock ", %name, " ", %pct);
-}
+function dataGotBlock(%name, %pct) {}
 
 function dataFinished() {
-	echo("dataFinished");
-	flushTextureCache(); // ??? RPGX does
+	flushTextureCache(); // TODO: needed?
 	remoteEval(2048, dataFinished);
 }
 
 // Server
 function remoteDataFinished(%clientId) {
-	echo("remoteDataFinished ", %clientId);
 	Client::setDataFinished(%clientId);
 	startGhosting(%clientId);
 }
 
 // Client (done)
 function onClientGhostAlwaysDone() {
-	echo("onClientGhostAlwaysDone");
-	// rebuildCommandMap()
+	// rebuildCommandMap() // TODO: needed?
 	if(!isObject("commandGui"))
 		loadObject("commandGui", "gui\\command.gui");
 
-	flushTextureCache(); // ??? probably just needed for rebuildCommandMap
+	flushTextureCache(); // TODO: needed? probably for rebuildCommandMap
 	purgeResources(true);
 	remoteEval(2048, CGADone);
 	
@@ -52,8 +44,6 @@ function onClientGhostAlwaysDone() {
 // Server (done)
 function onServerGhostAlwaysDone(%clientId) { echo("onServerGhostAlwaysDone ", %clientId); }
 function remoteCGADone(%clientId) {
-	echo("remoteCGADone ", %clientId);
-	
 	Editor::spawn(%clientId);
 }
 
@@ -72,7 +62,3 @@ function loadPlayGui() {
 	else
 		GuiLoadContentCtrl(MainWindow, "gui\\play.gui");
 }
-
-// Server-side events
-function Server::onClientDisconnect(%clientId) { echo("Server::onClientDisconnect ", %clientId); }
-

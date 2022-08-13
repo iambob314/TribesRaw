@@ -6,43 +6,18 @@ requireMod(std);
 requireMod(gui);
 
 exec("editor\\connectseq.cs");
+exec("editor\\server\\server.cs");
 
 exec("editor\\actions.cs");
 exec("editor\\me.cs");
 
 exec("editor\\gui\\gui.cs");
 exec("editor\\shapelist.cs");
-exec("editor\\newmission.cs");
 
 exec("editor\\editorcontrols.cs");
+exec("editor\\playercontrols.cs");
 
 function checkMasterTranslation() {} // called periodically after newObject(..., FearCSDelegate, true); TODO: implement for real
-
-function Editor::initServer(%port) {
-	// Create serverDelegate (server socket, etc.)
-	if (%port != "") %port = 28001;
-	newObject(serverDelegate, FearCSDelegate, true, "IP", %port, "IPX", %port, "LOOPBACK", %port);
-
-	// TODO: better VOL loading routine (need RPG vols, etc.)
-	newObject(EntitesVolume, SimVolume, "baseres\\shapes\\Entities.vol");
-	base::refreshSearchPath();
-
-	// Load datablocks
-	exec("editor\\armor.cs");
-	preloadServerDataBlocks();
-
-	// Reset managers
-	resetSimTime();
-	resetPlayerManager();
-	resetGhostManagers();
-	purgeResources(true);
-
-	// Create/load world
-	setInstantGroup(0);
-	Editor::newMission(testmis, lush, 1, true, 64, 123);
-	
-	newObject(MissionCleanup, SimGroup); // required: magic group name, used by DarkStar for projectiles, AI::Object, etc.
-}
 
 function Editor::initClient() {
 	// Prepare play.gui
@@ -65,15 +40,12 @@ function Editor::clientConnect(%hostname) {
 	connect(%hostname);
 }
 
-function Editor::initMERemote() {
-	exec("editor\\playercontrols.cs");
-}
+function Editor::initMERemote() {}
 
 function Editor::initMELoopback() {
 	// ME + editCamera init
 	ME::Create(MainWindow);
 
-	exec("editor\\playercontrols.cs");
 	newObject(editCamera, EditCamera, "editor.sae");
 	$ME::camera = editCamera; // required: used by DarkStar internally
 	
@@ -105,16 +77,6 @@ function Editor::focusInput(%m) {
 }
 
 function setFocus(%thing, %on) { if (%on) focus(%thing); else unfocus(%thing); }
-
-function Editor::spawn(%clientId) {
-	%player = newObject("", Player, larmor);
-	GameBase::setPosition(%player, "0 0 100");
-
-	Client::setOwnedObject(%clientId, %player);
-	Client::setControlObject(%clientId, %player);
-
-	Client::setGuiMode(%clientId, 1);
-}
 
 // TODO: this tail is experimental; clean up later
 
