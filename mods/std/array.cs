@@ -21,6 +21,7 @@
 // * apush(%v)    : append %v as last
 // * apop()       : pop last
 //
+// * amake(%s)    : make an array from the words in %s (clears array first)
 // * acompact()   : shift non-"" elements left to replace "" elements
 // * asort()      : sort array
 // * astr()       : stringify array (space-separated elements)
@@ -80,6 +81,11 @@ function afind(%v, %a) {
 		if (aget(%i, %a) == %v)
 			return %i;
 	return -1;
+}
+
+function amake(%s, %a) {
+	adel(%a);
+	for (%i = 0; (%w = getWord(%s, %i)) != -1; %i++) apush(%w, %a);
 }
 
 
