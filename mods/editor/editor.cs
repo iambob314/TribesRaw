@@ -1,7 +1,7 @@
-// TODO: embed controls in editor mod itself
-// TODO: better barebones world with flat terrain
-// TODO: get basic player movement working
-// TODO: get editor camera and GUI attachment
+// Basic map editor, intended to be used standalone (no other client/server mod).
+//
+// TODO:
+// * Client-side map editor
 requireMod(std);
 requireMod(gui);
 
@@ -66,14 +66,14 @@ function Editor::clientConnect(%hostname) {
 }
 
 function Editor::initMERemote() {
-	exec("editor\\controls.cs");
+	exec("editor\\playercontrols.cs");
 }
 
 function Editor::initMELoopback() {
 	// ME + editCamera init
 	ME::Create(MainWindow);
 
-	exec("editor\\controls.cs");
+	exec("editor\\playercontrols.cs");
 	newObject(editCamera, EditCamera, "editor.sae");
 	$ME::camera = editCamera; // required: used by DarkStar internally
 	
