@@ -7,6 +7,9 @@ requireMod(gui);
 
 exec("editor\\connectseq.cs");
 
+exec("editor\\actions.cs");
+exec("editor\\me.cs");
+
 exec("editor\\gui\\gui.cs");
 exec("editor\\shapelist.cs");
 exec("editor\\newmission.cs");
@@ -74,12 +77,7 @@ function Editor::initMELoopback() {
 	newObject(editCamera, EditCamera, "editor.sae");
 	$ME::camera = editCamera; // required: used by DarkStar internally
 	
-	// Set up ME modes/variables
-	ME::SetGrabMask(~($ObjectType::Terrain | $ObjectType::Container | $ME::SimDefaultObject));
-	ME::SetDefaultPlaceMask($ObjectType::Terrain | $ObjectType::Interior);
-	$ME::MoveSensitivity 	= 0.2;
-	$ME::RotateSensitivity 	= 0.02;
-	// TODO: init other "special" $ME vars and call ME::GetConsoleOptions()
+	Editor::ME::initSettings();
 	
 	// TED init (TODO: crashy because missing TED config funcs/vars probably)
 	//Ted::initTed();
@@ -87,29 +85,26 @@ function Editor::initMELoopback() {
 	// TODO: other TED config funcs (and vars, but these may be simple mirrors of config funcs and unnecessary)
 }
 
-// Magic vars loaded during ME::GetConsoleOptions():
-// (see https://github.com/AltimorTASDK/TribesRebirth/blob/1105fd0890c19c13f816b91e51b9cf0658ffc63c/program/code/FearMissionEditor.cpp#L1306)
-// $ME::ShowEditObjects
-// $ME::ShowGrabHandles
-// $ME::SnapToGrid
-// $ME::XGridSnap
-// $ME::YGridSnap
-// $ME::ZGridSnap
-// $ME::ConstrainX
-// $ME::ConstrainY
-// $ME::ConstrainZ
-// $ME::RotateXAxis
-// $ME::RotateYAxis
-// $ME::RotateZAxis
-// $ME::RotationSnap
-// $ME::SnapRotations
-// $ME::DropAtCamera
-// $ME::DropWithRotAtCamera
-// $ME::DropBelowCamera
-// $ME::DropToScreenCenter
-// $ME::DropToSelectedObject
-// $ME::UsePlaneMovement
-// $ME::ObjectsSnapToTerrain
+// Editor::focusInput focuses inputs on one of three modes:
+// * Player: player delegate
+// * ME: mission editor
+// * TED: terrain editor
+function Editor::focusInput(%m) {
+	assert(%m == Player || %m == ME || %m == TED, "bad mode '" @ %m @ "'");
+	
+	setFocus(playDelegate,  %m == Player);
+	setFocus(editCamera,    %m != Player);
+	setFocus(MissionEditor, %m == ME);
+	setFocus(TedObject,     %m == TED);
+	if (%m == Player) {
+		cursorOff(MainWindow);
+	} else {
+		cursorOn(MainWindow);
+		postAction(EditorGui, Attach, editCamera);
+	}
+}
+
+function setFocus(%thing, %on) { if (%on) focus(%thing); else unfocus(%thing); }
 
 function Editor::spawn(%clientId) {
 	%player = newObject("", Player, larmor);
