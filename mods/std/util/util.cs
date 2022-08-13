@@ -34,3 +34,13 @@ function invokestr(%f, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9, %a10, %
 	%eval = %eval @ ");";
 	return %eval;
 }
+
+// invoke is equivalent to eval'ing the return of invokestr.
+function invoke(%f, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9, %a10, %a11, %a12, %a13, %a14, %a15, %a16, %a17, %a18, %a19) {
+	%cmd = invokestr(%f, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9, %a10, %a11, %a12, %a13, %a14, %a15, %a16, %a17, %a18, %a19);
+	return eval(%cmd);
+}
+
+function assert(%cond, %msg) {
+	if (%cond == "" || !%cond) { echo("ASSERTION FAILED: ", %msg); trace(); quit(); }
+}
