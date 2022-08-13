@@ -12,7 +12,7 @@ exec("base_vols.cs");
 // base::init is called at the end of this file (defined at top here for visibility)
 function base::init() {
 	// Core console variables
-	$Console::logMode = 1;
+	$Console::logMode = 1; // 0 == no log file, 1 = reopen log file every line, 2 = keep log file open
 	$Console::printLevel = 1;
 	$Console::prompt = "$ ";
 	$Console::history = 999;
