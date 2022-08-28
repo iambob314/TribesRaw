@@ -1,3 +1,5 @@
 console.log
 
 Temp/*
+# temporary while working on remote editor (to be later moved to mods/editor/remote/gui)
+!Temp/remoteEditor.gui
