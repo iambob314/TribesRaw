@@ -26,10 +26,13 @@
 // * asort()      : sort array
 // * astr()       : stringify array (space-separated elements)
 //
-// * aitfirst()   : start iteration, return first
-// * aitnext()    : continue iteration, return next
-// * aitdone()    : is iteration done?
-// * ait()        : iteration next index
+// * aitfirst()         : start iteration, return first
+// * aitnext()          : continue iteration, return next
+// * aitdone()          : is iteration done?
+// * ait()              : iteration next index
+// * ado(%f,%a,...)     : iterate %a, call %f with ... args followed by the element
+// * ado2(%f,%k,%a,...) : iterate %a, call %f with ... args but replace %k'th arg with the element
+//                        (NB: %a arg precedes ... args, not last as usual)
 //
 // * afromwords(%s)    : make array from the words in %s (clears array first)
 // * afromvar(%vn,%vl) : make array from global var named %vn (if %vn == "$abc", use values $abc[%i]), up to len %vl (or if omitted, up to first "" value)
@@ -109,6 +112,24 @@ function aitdone(%a) { return ait(%a) == alen(%a); }
 // ait returns current index of the active iterator (or 0 if none active)
 function ait(%a) { return def($_a[%a, ""], 0); }
 
+// ado iterates over an array, calling %f(%a0, %a1, ..., %v) for each element %v
+function ado(%f, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
+	%insertIdx = 0;
+	for (%i = 0; %i < 10; %i++) {
+		if (%a[%i] != "") { %insertIdx = %i+1; }
+	}
+	assert(%insertIdx < 10, "ado overflow");
+	ado2(%f, %insertIdx, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9);
+}
+
+// ado iterates over an array, calling %f(%a0, %a1, ...) with %a[%k] replaced with %v for
+// each element %v
+function ado2(%f, %k, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
+	for (%v = aitfirst(%a); !aitdone(%a); %v = aitnext(%a)) {
+		%a[%k] = %v;
+		invoke(%f, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9);
+	}
+}
 
 
 // adel deletes an entire array
