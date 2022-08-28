@@ -14,6 +14,7 @@ $Editor::isLoopback = (afind("-server", argv) != -1); // -server command-line fl
 
 exec("editor\\connectseq.cs");
 exec("editor\\client.cs");
+exec("editor\\gui\\gui.cs");
 
 if ($Editor::isLoopback) {
 	exec("editor\\server\\server.cs");
@@ -23,7 +24,6 @@ if ($Editor::isLoopback) {
 }
 
 exec("editor\\playercontrols.cs");
-exec("editor\\gui.cs");
 exec("editor\\shapelist.cs"); // TODO: should this be server-side only?
 
 

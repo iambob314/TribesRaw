@@ -1,4 +1,4 @@
-exec("editor\\guimodal.cs");
+exec("editor\\gui\\modal.cs");
 
 //
 // Defined in loopback.cs or remote.cs:
