@@ -1,5 +1,9 @@
 exec("editor\\remote\\controls.cs");
 
+function Editor::onConnect() {
+	Editor::downloadData();
+}
+
 // Defining hooks for main editor code
 $EditorUI::validMode[Camera] = true;
 $EditorUI::validMode[Create] = true;
@@ -18,7 +22,7 @@ function Editor::focusInput(%m) {
 	if (%m == Player) popActionMap("remoteEditor.sae");
 	else              pushActionMap("remoteEditor.sae");
 
-	remoteEval(2048, Editor::setInputMode, %m);
+	Editor::setInputMode(%m);
 }
 $Editor::validInputMode[Player] = true;
 $Editor::validInputMode[Observer]  = true;

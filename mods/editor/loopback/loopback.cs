@@ -5,6 +5,23 @@ exec("editor\\loopback\\controls.cs");
 
 exec("editor\\loopback\\gui\\gui.cs");
 
+
+function Editor::onConnect() {
+	// ME + editCamera init
+	ME::Create(MainWindow);
+
+	newObject(editCamera, EditCamera, "editor.sae");
+	$ME::camera = editCamera; // required: used by DarkStar internally
+	
+	Editor::initMESettings();
+	
+	// TED init (TODO: crashy because missing TED config funcs/vars probably)
+	//Ted::initTed();
+	//Ted::attachToTerrain();
+	// TODO: other TED config funcs (and vars, but these may be simple mirrors of config funcs and unnecessary)
+}
+
+
 // Defining hooks for main editor code
 $EditorUI::validMode[Camera] = true;
 $EditorUI::validMode[Create] = true;

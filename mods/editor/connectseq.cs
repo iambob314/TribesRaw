@@ -37,8 +37,7 @@ function onClientGhostAlwaysDone() {
 	purgeResources(true);
 	remoteEval(2048, CGADone);
 	
-	if ($Editor::isLoopback) Editor::initMELoopback();
-	else                     Editor::initMERemote();
+	Editor::onConnect();
 }
 
 // Server (done)
