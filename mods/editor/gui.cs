@@ -27,14 +27,11 @@ function EditorUI::showMode(%mode) {
 	
 	assert($EditorUI::validMode[%mode], "bad mode '" @ %mode @ "'");
 
-	echo("show ", %mode);
-
 	$EditorUI::mode = %mode;
 	invoke("EditorUI::" @ $EditorUI::mode @ "::show");
 }
 
 function EditorUI::hide() {
-	echo("hide");
 	if (!isObject($EditorUI::guiObject)) return false; // already hidden
 	GuiLoadContentCtrl(MainWindow, "gui\\play.gui");
 	Editor::focusInput(Player);
