@@ -1,15 +1,18 @@
-// Top-level UI modes
-exec("editor\\gui\\camera.cs");
-exec("editor\\gui\\create.cs");
-exec("editor\\gui\\inspect.cs");
-exec("editor\\gui\\ted.cs");
+exec("editor\\guimodal.cs");
 
-exec("editor\\gui\\modal.cs");
+//
+// Defined in loopback.cs or remote.cs:
+// * $EditorUI::validMode[%mode]
+// * EditorUI::<mode>::show()   (for valid modes below)
+//
+// * $EditorUI::guiObject       (e.g. EditorGui)
+// * $EditorUI::guiPath         (e.g. "gui\\editor.gui")
+// * $EditorUI::allControls     (space-separated UI control names)
 
-// Editor modes: Camera Create Inspect Ted
+// Editor modes: see $EditorUI::validMode in loopback.cs or remote.cs
 $EditorUI::mode = Create; // current mode, or last used if editor UI not displayed
 function EditorUI::getMode() {
-	if (isObject(EditorGui)) return $EditorUI::mode;
+	if (isObject($EditorUI::guiObject)) return $EditorUI::mode;
 	else return "";
 }
 
@@ -19,14 +22,14 @@ function EditorUI::showMode(%mode) {
 	if (%mode == $EditorUI::mode) return;     // already shown
 	if (%mode == "") %mode = $EditorUI::mode; // if mode not specified, show last used
 	
-	assert(%mode == Camera || %mode == Create || %mode == Inspect || %mode == Ted, "bad mode '" @ %mode @ "'");
+	assert($EditorUI::validMode[%mode], "bad mode '" @ %mode @ "'");
 
 	$EditorUI::mode = %mode;
 	invoke("EditorUI::" @ $EditorUI::mode @ "::show");
 }
 
 function EditorUI::hide() {
-	if (!isObject(EditorGui)) return false; // already hidden
+	if (!isObject($EditorUI::guiObject)) return false; // already hidden
 	GuiLoadContentCtrl(MainWindow, "gui\\play.gui");
 	Editor::focusInput(Player);
 	return true;
@@ -36,7 +39,7 @@ function EditorUI::hide() {
 // Helper functions for editor modes
 //
 
-$EditorUI::allControls = "MEObjectList Inspector Creator TedBar SaveBar";
+// EditorUI::showOnlyControls shows controls %ctrls and hides all others (as per $EditorUI::allControls)
 function EditorUI::showOnlyControls(%ctrls) {
 	for (%i = 0; (%c = getWord($EditorUI::allControls, %i)) != -1; %i++) Control::setVisible(%c, false);
 	for (%i = 0; (%c = getWord(%ctrls, %i)) != -1; %i++)                 Control::setVisible(%c, true);
@@ -46,26 +49,10 @@ function EditorUI::showOnlyControls(%ctrls) {
 // EditorUI::<mode>::show will generally call this, and Editor::focus as well as
 // refresh lists, etc. if it returns true.
 function EditorUI::loadGUI(%mode) {
-	if (isObject(EditorGui)) return false; // already shown; nothing to do
+	if (isObject($EditorUI::guiObject)) return false; // already shown; nothing to do
 	
-	GuiLoadContentCtrl(MainWindow, "gui\\editor.gui");
+	GuiLoadContentCtrl(MainWindow, $EditorUI::guiPath);
 	EditorUI::refreshControls(); // repopulate lists, etc.
 	
 	return true;
-}
-
-function EditorUI::refreshControls() {
-	EditorUI::refreshCreatorLists(); // in gui\create.cs
-	EditorUI::refreshMissionObjectList();
-	EditorUI::refreshTed(); // in gui\ted.cs
-}
-
-function EditorUI::refreshMissionObjectList() {
-	MissionObjectList::ClearDisplayGroups();
-	MissionObjectList::AddDisplayGroup(1, "MissionGroup");
-	MissionObjectList::AddDisplayGroup(1, "MissionCleanup");
-	MissionObjectList::SetSelMode(1);
-	
-	if ($ME::InspectObject != "")
-		MissionObjectList::Inspect($ME::InspectWorld, $ME::InspectObject);
 }

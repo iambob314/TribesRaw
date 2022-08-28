@@ -9,16 +9,17 @@ $Editor::isLoopback = (afind("-server", argv) != -1); // -server command-line fl
 
 exec("editor\\connectseq.cs");
 exec("editor\\client.cs");
-exec("editor\\server\\server.cs");
 
-exec("editor\\actions.cs");
-exec("editor\\me.cs");
+if ($Editor::isLoopback) {
+	exec("editor\\server\\server.cs");
+	exec("editor\\loopback\\loopback.cs");
+} else {
+	exec("editor\\remote\\remote.cs");
+}
 
-exec("editor\\gui\\gui.cs");
-exec("editor\\shapelist.cs");
-
-exec("editor\\editorcontrols.cs");
 exec("editor\\playercontrols.cs");
+exec("editor\\gui.cs");
+exec("editor\\shapelist.cs"); // TODO: should this be server-side only?
 
 function Editor::initMERemote() {}
 

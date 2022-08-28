@@ -1,5 +1,7 @@
 // Editor modals (ME options, TED options, help)
 
+// TODO: make these more generic by delegating Control names to e.g. EditorUI::<mode>::optionsModal
+
 function EditorUI::getModal() {
 	if (Control::getVisible(OptionsCtrl))         return OptionsCtrl;
 	else if (Control::getVisible(TedOptionsCtrl)) return TedOptionsCtrl;

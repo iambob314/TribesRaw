@@ -1,5 +1,11 @@
 // Common client-side setup/functions, for loopback and remote
 
+$Editor::validInputMode[Player] = true;
+if ($Editor::isLoopback) {
+	$Editor::validInputMode[ME]  = true;
+	$Editor::validInputMode[TED] = true;
+}
+
 function checkMasterTranslation() {} // called periodically after newObject(..., FearCSDelegate, true); TODO: implement for real
 
 function Editor::initClient() {
@@ -29,8 +35,8 @@ function Editor::clientConnect(%hostname) {
 // * TED: terrain editor
 // For non-loopback client, only Player is valid.
 function Editor::focusInput(%m) {
-	assert($Editor::validInputMode[%m, $Editor::isLoopback], "bad mode '" @ %m @ "'");
-	
+	assert($Editor::validInputMode[%m], "bad mode '" @ %m @ "'");
+
 	setFocus(playDelegate,  %m == Player);
 	setFocus(editCamera,    %m != Player);
 	setFocus(MissionEditor, %m == ME);
@@ -39,13 +45,8 @@ function Editor::focusInput(%m) {
 		cursorOff(MainWindow);
 	} else {
 		cursorOn(MainWindow);
-		postAction(EditorGui, Attach, editCamera);
+		postAction($EditorUI::guiObject, Attach, editCamera); // $EditorUI::guiObject defined in editor\gui.cs
 	}
 }
-// $Editor::validInputMode[%mode, %isLoopback] = true iff valid
-$Editor::validInputMode[Player, false] = true;
-$Editor::validInputMode[Player, true ] = true;
-$Editor::validInputMode[ME,     true ] = true;
-$Editor::validInputMode[TED,    true ] = true;
 
 function setFocus(%thing, %on) { if (%on) focus(%thing); else unfocus(%thing); }
