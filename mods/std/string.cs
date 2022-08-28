@@ -1,5 +1,3 @@
-
-
 function String::length(%str) {
   if (%str == "") return 0;
   %lb = 0;

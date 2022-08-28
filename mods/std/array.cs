@@ -2,9 +2,9 @@
 // How to use arrays:
 //
 // An array is global and is referenced by name. The "default" array is named ""; otherwise, valid array
-// names are valid variable names, except understore is prohibited.
+// names are valid variable names except underscore is prohibited.
 //
-// Arrays are accessed via the functions below. Parameter naming is standard:
+// Arrays are accessed via the functions below. These parameter names are standard:
 // * %a:     the array name; always last and optional (defaults to "default" array)
 // * %i, %j: an array index
 // * %v:     a value
@@ -20,8 +20,8 @@
 // * aswap(%i,%j) : swap elements %i and %j
 // * apush(%v)    : append %v as last
 // * apop()       : pop last
+// * afind(%v)    : first index of %v, or -1 if not found
 //
-// * amake(%s)    : make an array from the words in %s (clears array first)
 // * acompact()   : shift non-"" elements left to replace "" elements
 // * asort()      : sort array
 // * astr()       : stringify array (space-separated elements)
@@ -31,10 +31,13 @@
 // * aitdone()    : is iteration done?
 // * ait()        : iteration next index
 //
-// Internal storage for array %X:
-// $_a[%X] = len;  // if "", then array is unused
-// $_a[%X, ""] = cur idx (for iteration)
-// $_a[%X, %i] = %i'th value;
+// * afromwords(%s)    : make array from the words in %s (clears array first)
+// * afromvar(%vn,%vl) : make array from global var named %vn (if %vn == "$abc", use values $abc[%i]), up to len %vl (or if omitted, up to first "" value)
+//
+// Internal storage for array %a:
+// $_a[%a] = len;  // if "", then array is unused
+// $_a[%a, ""] = cur idx (for iteration)
+// $_a[%a, %i] = %i'th value;
 //
 
 function alen(%a) { return def($_a[%a], 0); }
@@ -81,11 +84,6 @@ function afind(%v, %a) {
 		if (aget(%i, %a) == %v)
 			return %i;
 	return -1;
-}
-
-function amake(%s, %a) {
-	adel(%a);
-	for (%i = 0; (%w = getWord(%s, %i)) != -1; %i++) apush(%w, %a);
 }
 
 
@@ -171,3 +169,29 @@ function aidx(%i, %a) {
 	%i |= 0; // integer-ify
 	return tern(%i >= 0 && %i < alen(%a), %i, "");
 }
+
+
+//
+// Mass constructors
+//
+
+// afromwords clears %a and loads it with the words from %s as elements.
+function afromwords(%s, %a) {
+	adel(%a);
+	for (%i = 0; (%w = getWord(%s, %i)) != -1; %i++) apush(%w, %a);
+}
+
+
+// afromvar clears %a and loads it with the elements from the array-variable named %vn, up
+// to %vl elements (or if omitted, up to first "" value).
+//
+// Example: afromvar("$abc", 3, %a) loads $abc[0], $abc[1], $abc[2] into %a
+function afromvar(%vn, %vl, %a) {
+	adel(%a);
+	for (%i = 0; %vl == "" || %i < %vl; %i++) {
+		%v = eval("%_ = " @ %vn @ "[" @ %i @ "];");
+		if (%vl == "" && %v == "") break;
+		apush(%v, %a);
+	}
+}
+
