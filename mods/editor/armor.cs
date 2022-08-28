@@ -3,7 +3,6 @@ PlayerData larmor
 {
    className = "Armor";
    shapeFile = "larmor";
-   damageSkinData = "armorDamageSkins";
    flameShapeName = "lflame";
    shieldShapeName = "shield";
    shadowDetailMask = 1;
@@ -56,8 +55,8 @@ PlayerData larmor
    animData[12] = { "crouch side left", none, 1, true, false, true, false, 3 };
    animData[13] = { "crouch side left", none, -1, true, false, true, false, 3 };
    animData[14]  = { "fall", none, 1, true, true, true, false, 3 };
-   animData[15]  = { "landing", SoundLandOnGround, 1, true, false, false, false, 3 };
-   animData[16]  = { "landing", SoundLandOnGround, 1, true, false, false, false, 3 };
+   animData[15]  = { "landing", none, 1, true, false, false, false, 3 };
+   animData[16]  = { "landing", none, 1, true, false, false, false, 3 };
    animData[17]  = { "tumble loop", none, 1, true, false, false, false, 3 };
    animData[18]  = { "tumble end", none, 1, true, false, false, false, 3 };
    animData[19] = { "jet", none, 1, true, true, true, false, 3 };
@@ -70,19 +69,19 @@ PlayerData larmor
    animData[24] = { "apc pilot", none, 1, false, false, false, false, 3 };
    
    // death animations:
-   animData[25] = { "crouch die", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[26] = { "die chest", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[27] = { "die head", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[28] = { "die grab back", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[29] = { "die right side", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[30] = { "die left side", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[31] = { "die leg left", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[32] = { "die leg right", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[33] = { "die blown back", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[34] = { "die spin", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[35] = { "die forward", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[36] = { "die forward kneel", SoundPlayerDeath, 1, false, false, false, false, 4 };
-   animData[37] = { "die back", SoundPlayerDeath, 1, false, false, false, false, 4 };
+   animData[25] = { "crouch die", none, 1, false, false, false, false, 4 };
+   animData[26] = { "die chest", none, 1, false, false, false, false, 4 };
+   animData[27] = { "die head", none, 1, false, false, false, false, 4 };
+   animData[28] = { "die grab back", none, 1, false, false, false, false, 4 };
+   animData[29] = { "die right side", none, 1, false, false, false, false, 4 };
+   animData[30] = { "die left side", none, 1, false, false, false, false, 4 };
+   animData[31] = { "die leg left", none, 1, false, false, false, false, 4 };
+   animData[32] = { "die leg right", none, 1, false, false, false, false, 4 };
+   animData[33] = { "die blown back", none, 1, false, false, false, false, 4 };
+   animData[34] = { "die spin", none, 1, false, false, false, false, 4 };
+   animData[35] = { "die forward", none, 1, false, false, false, false, 4 };
+   animData[36] = { "die forward kneel", none, 1, false, false, false, false, 4 };
+   animData[37] = { "die back", none, 1, false, false, false, false, 4 };
 
    // signal moves:
 	animData[38] = { "sign over here",  none, 1, true, false, false, false, 2 };
@@ -108,43 +107,6 @@ PlayerData larmor
 	// Bonus wave
    animData[50] = { "wave", none, 1, true, false, false, true, 1 };
 
-   rFootSounds = 
-   {
-     SoundLFootRSoft,
-     SoundLFootRHard,
-     SoundLFootRSoft,
-     SoundLFootRHard,
-     SoundLFootRSoft,
-     SoundLFootRSoft,
-     SoundLFootRSoft,
-     SoundLFootRHard,
-     SoundLFootRSnow,
-     SoundLFootRSoft,
-     SoundLFootRSoft,
-     SoundLFootRSoft,
-     SoundLFootRSoft,
-     SoundLFootRSoft,
-     SoundLFootRSoft
-  }; 
-   lFootSounds =
-   {
-      SoundLFootLSoft,
-      SoundLFootLHard,
-      SoundLFootLSoft,
-      SoundLFootLHard,
-      SoundLFootLSoft,
-      SoundLFootLSoft,
-      SoundLFootLSoft,
-      SoundLFootLHard,
-      SoundLFootLSnow,
-      SoundLFootLSoft,
-      SoundLFootLSoft,
-      SoundLFootLSoft,
-      SoundLFootLSoft,
-      SoundLFootLSoft,
-      SoundLFootLSoft
-   };
-
    footPrints = { 0, 1 };
 
    boxWidth = 0.5;
@@ -161,120 +123,4 @@ PlayerData larmor
    boxHeadRightPercentage = 1;
    boxHeadBackPercentage  = 0;
    boxHeadFrontPercentage = 1;
-};
-
-SoundData SoundPlayerDeath
-{
-   wavFileName = "player_death.wav";
-   profile = Profile3dMedium;
-};
-
-SoundData SoundLFootRSoft
-{
-   wavFileName = "lfootrsoft.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundLFootRHard
-{
-   wavFileName = "lfootrhard.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundLFootRSnow
-{
-   wavFileName = "lfootrsnow.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundLFootLSoft
-{
-   wavFileName = "lfootlsoft.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundLFootLHard
-{
-   wavFileName = "lfootlhard.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundLFootLSnow
-{
-   wavFileName = "lfootlsnow.wav";
-   profile = Profile3dFoot;
-};
-
-
-SoundData SoundMFootRSoft
-{
-   wavFileName = "mfootrsoft.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundMFootRHard
-{
-   wavFileName = "mfootrhard.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundMFootRSnow
-{
-   wavFileName = "mfootrsnow.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundMFootLSoft
-{
-   wavFileName = "mfootlsoft.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundMFootLHard
-{
-   wavFileName = "mfootlhard.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundMFootLSnow
-{
-   wavFileName = "mfootlsnow.wav";
-   profile = Profile3dFoot;
-};
-
-
-SoundData SoundHFootRSoft
-{
-   wavFileName = "hfootrsoft.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundHFootRHard
-{
-   wavFileName = "hfootrhard.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundHFootRSnow
-{
-   wavFileName = "hfootrsnow.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundHFootLSoft
-{
-   wavFileName = "hfootlsoft.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundHFootLHard
-{
-   wavFileName = "hfootlhard.wav";
-   profile = Profile3dFoot;
-};
-
-SoundData SoundHFootLSnow
-{
-   wavFileName = "hfootlsnow.wav";
-   profile = Profile3dFoot;
 };
