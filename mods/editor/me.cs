@@ -1,6 +1,6 @@
 // Direct interaction with the ME system (magic vars, callbacks, etc.)
 
-function Editor::ME::initSettings() {
+function Editor::initMESettings() {
 	// TODO: init other "special" $ME vars and call ME::GetConsoleOptions()
 	
 	// Set up ME modes/variables
