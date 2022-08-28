@@ -21,11 +21,8 @@ function EditorUI::showMode(%mode) {
 	
 	assert(%mode == Camera || %mode == Create || %mode == Inspect || %mode == Ted, "bad mode '" @ %mode @ "'");
 
-	$EditorUI::mode = %mode;                  // update mode
-
+	$EditorUI::mode = %mode;
 	invoke("EditorUI::" @ $EditorUI::mode @ "::show");
-
-	EditorUI::refreshControls();
 }
 
 function EditorUI::hide() {
@@ -35,7 +32,27 @@ function EditorUI::hide() {
 	return true;
 }
 
-// Global editor UI init
+//
+// Helper functions for editor modes
+//
+
+$EditorUI::allControls = "MEObjectList Inspector Creator TedBar SaveBar";
+function EditorUI::showOnlyControls(%ctrls) {
+	for (%i = 0; (%c = getWord($EditorUI::allControls, %i)) != -1; %i++) Control::setVisible(%c, false);
+	for (%i = 0; (%c = getWord(%ctrls, %i)) != -1; %i++)                 Control::setVisible(%c, true);
+}
+
+// EditorUI::loadGUI loads the editor GUI, returning true iff not already loaded.
+// EditorUI::<mode>::show will generally call this, and Editor::focus as well as
+// refresh lists, etc. if it returns true.
+function EditorUI::loadGUI(%mode) {
+	if (isObject(EditorGui)) return false; // already shown; nothing to do
+	
+	GuiLoadContentCtrl(MainWindow, "gui\\editor.gui");
+	EditorUI::refreshControls(); // repopulate lists, etc.
+	
+	return true;
+}
 
 function EditorUI::refreshControls() {
 	EditorUI::refreshCreatorLists(); // in gui\create.cs
@@ -51,24 +68,4 @@ function EditorUI::refreshMissionObjectList() {
 	
 	if ($ME::InspectObject != "")
 		MissionObjectList::Inspect($ME::InspectWorld, $ME::InspectObject);
-}
-
-
-//
-// Helper functions for editor modes
-//
-
-// EditorUI::loadGUI loads the editor GUI, returning true iff not already loaded.
-// EditorUI::<mode>::show will generally call this, and Editor::focus as well as
-// refresh lists, etc. if it returns true.
-function EditorUI::loadGUI(%mode) {
-	if (isObject(EditorGui)) return false; // already shown
-	GuiLoadContentCtrl(MainWindow, "gui\\editor.gui");
-	return true;
-}
-
-$EditorUI::allControls = "MEObjectList Inspector Creator TedBar SaveBar";
-function EditorUI::showOnlyControls(%ctrls) {
-	for (%i = 0; (%c = getWord($EditorUI::allControls, %i)) != -1; %i++) Control::setVisible(%c, false);
-	for (%i = 0; (%c = getWord(%ctrls, %i)) != -1; %i++)                 Control::setVisible(%c, true);
 }
