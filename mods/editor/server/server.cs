@@ -8,6 +8,8 @@
 
 exec("editor\\server\\newmission.cs");
 
+exec("editor\\server\\remote.cs");
+
 function Editor::initServer(%port) {
 	// Create serverDelegate (server socket, etc.)
 	if (%port != "") %port = 28001;

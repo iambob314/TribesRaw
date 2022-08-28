@@ -80,6 +80,11 @@ bindCommand(keyboard0, make, "q", TO, "nextWeapon();");
 bindCommand(keyboard0, make, shift, "q", TO, "prevWeapon();");
 bindCommand(keyboard0, make, "f", TO, "setFreeLook(TRUE);");
 bindCommand(keyboard0, break, "f", TO, "setFreeLook(FALSE);");
+bindCommand(keyboard0, make, "j", TO, "echo(actionmap);");
+
 NewActionMap("pdaMap.sae");
 bindAction(keyboard0, make, "z", TO, IDACTION_ZOOM_MODE_ON);
 bindAction(keyboard0, break, "z", TO, IDACTION_ZOOM_MODE_OFF);
+
+NewActionMap("funMap.sae");
+bindCommand(keyboard0, make, "f5", TO, "EditorUI::hide();");

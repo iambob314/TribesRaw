@@ -3,14 +3,17 @@ exec("editor\\guimodal.cs");
 //
 // Defined in loopback.cs or remote.cs:
 // * $EditorUI::validMode[%mode]
-// * EditorUI::<mode>::show()   (for valid modes below)
+// * EditorUI::<mode>::show()      (for valid modes below)
+// * EditorUI::refreshControls()   (called when GUI is (re)loaded and lists need repop)
+//
+// * Editor::focusInput(%mode)  (%mode = Player always valid; other modes loopback/remote-specific)
 //
 // * $EditorUI::guiObject       (e.g. EditorGui)
 // * $EditorUI::guiPath         (e.g. "gui\\editor.gui")
 // * $EditorUI::allControls     (space-separated UI control names)
 
 // Editor modes: see $EditorUI::validMode in loopback.cs or remote.cs
-$EditorUI::mode = Create; // current mode, or last used if editor UI not displayed
+$EditorUI::mode = Camera; // current mode, or last used if editor UI not displayed
 function EditorUI::getMode() {
 	if (isObject($EditorUI::guiObject)) return $EditorUI::mode;
 	else return "";
@@ -24,11 +27,14 @@ function EditorUI::showMode(%mode) {
 	
 	assert($EditorUI::validMode[%mode], "bad mode '" @ %mode @ "'");
 
+	echo("show ", %mode);
+
 	$EditorUI::mode = %mode;
 	invoke("EditorUI::" @ $EditorUI::mode @ "::show");
 }
 
 function EditorUI::hide() {
+	echo("hide");
 	if (!isObject($EditorUI::guiObject)) return false; // already hidden
 	GuiLoadContentCtrl(MainWindow, "gui\\play.gui");
 	Editor::focusInput(Player);
