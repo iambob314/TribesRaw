@@ -1,10 +1,18 @@
+exec("editor\\remote\\remotes.cs");
+exec("editor\\remote\\gui\\gui.cs");
+
 exec("editor\\remote\\controls.cs");
 
-function Editor::onConnect() {
-	Editor::downloadData();
-}
+// Add some tags for reticle options in the observer-camera remote editor UI
+IDBMP_RETICLE1 = 00160923, "CUR_WayPoint.bmp";
+IDBMP_RETICLE2 = 00160924, "LR_H_Reticle.bmp";
 
 // Defining hooks for main editor code
+
+function Editor::onConnect() {
+	Editor::downloadRegistry();
+}
+
 $EditorUI::validMode[Camera] = true;
 $EditorUI::validMode[Create] = true;
 $EditorUI::validMode[Inspect] = true;
@@ -22,7 +30,7 @@ function Editor::focusInput(%m) {
 	if (%m == Player) popActionMap("remoteEditor.sae");
 	else              pushActionMap("remoteEditor.sae");
 
-	Editor::setInputMode(%m);
+	Editor::setControlMode(%m);
 }
 $Editor::validInputMode[Player] = true;
 $Editor::validInputMode[Observer]  = true;

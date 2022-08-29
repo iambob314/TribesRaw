@@ -24,7 +24,7 @@ if ($Editor::isLoopback) {
 }
 
 exec("editor\\playercontrols.cs");
-exec("editor\\shapelist.cs"); // TODO: should this be server-side only?
+exec("editor\\registry.cs");
 
 
 // TODO: this tail is experimental; clean up later
@@ -35,6 +35,7 @@ Editor::initClient(); // required: must create clientDelegate BEFORE serverDeleg
 if ($Editor::isLoopback) {
 	focusServer();
 	Editor::initServer(28001);
+	schedule("EditorRegistry::defaults();", 0); // load object list after stuff is started
 	focusClient();
 }
 

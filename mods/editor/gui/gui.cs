@@ -1,5 +1,7 @@
 exec("editor\\gui\\modal.cs");
 
+exec("editor\\gui\\create.cs");
+
 //
 // Defined in loopback.cs or remote.cs:
 // * $EditorUI::validMode[%mode]

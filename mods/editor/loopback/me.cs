@@ -4,7 +4,7 @@ function Editor::initMESettings() {
 	// TODO: init other "special" $ME vars and call ME::GetConsoleOptions()
 	
 	// Set up ME modes/variables
-	ME::SetGrabMask(~($ObjectType::Terrain | $ObjectType::Container | $ME::SimDefaultObject));
+	ME::SetGrabMask(~($ObjectType::Terrain | $ObjectType::Container | $ObjectType::Default));
 	ME::SetDefaultPlaceMask($ObjectType::Terrain | $ObjectType::Interior);
 
 	$ME::MoveSensitivity 	= 0.2;

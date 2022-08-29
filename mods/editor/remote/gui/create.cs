@@ -6,41 +6,12 @@ function EditorUI::Create::show() {
 	EditorUI::showOnlyControls("MEObjectList Creator");
 }
 
-function EditorUI::refreshCreatorLists() {
-	TextList::clear(GroupList);
-	TextList::clear(NameList);
-	
-	for (%group = aitfirst(ME::objgroups); !aitdone(ME::objgroups); %group = aitnext(ME::objgroups))
-		TextList::addLine(GroupList, %group);
-}
-
 //
 // GUI controls
 //
 
-function GroupList::onAction() {
-	TextList::clear(NameList);
-	%group = Control::getValue(GroupList);
-
-	%namesArr = "ME::objgroup_" @ %group @ "::names";
-	for (%name = aitfirst(%namesArr); !aitdone(%namesArr); %name = aitnext(%namesArr))
-		TextList::AddLine(NameList, %name);
-}
-
-function NameList::onAction() {
-	%group = Control::getValue(GroupList);
-	%name = Control::getValue(NameList);
-	%namesArr = "ME::objgroup_" @ %group @ "::names";
-	%scriptsArr = "ME::objgroup_" @ %group @ "::scripts";
-
-	%idx = afind(%name, %namesArr);
-	if (%idx == -1)
-		echos("ohnoes", %group, %name);
-
-	%script = aget(%idx, %scriptsArr);
-	echos("TODO", %idx, %name, %script);
-	%x = eval(%script);
-	echo(%x);
+function Editor::createObject(%group, %name) { // called from common editor\gui\create.cs
+	echos("TIME TO CREATE", %group, %name);
 }
 
 // MissionObjectList in inspect.cs

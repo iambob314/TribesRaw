@@ -10,11 +10,11 @@ function EditorUI::Inspect::show() {
 // GUI controls
 //
 
-// Note: MissionObjectList::on* are more than GUI functions: ME itself calls these selecting
-// objects in the world, and they must update/call all of these for ME to work right:
+// Note: MissionObjectList::on* are more than GUI functions: ME itself calls these when
+// selecting objects in the world, and they in turn must update/call these for ME to work right:
 // * MissionObjectList::Inspect
-// * $ME::Inspect*
-// * and ME::on*
+// * $ME::Inspect{World,Object}
+// * ME::on{Selected,Unselected,SelectionCleared}
 
 function MissionObjectList::onUnselected(%world, %obj) {
 	if (%obj == $ME::InspectObject && %world == $ME::InspectWorld) {

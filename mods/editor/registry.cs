@@ -33,6 +33,11 @@ function EditorRegistry::addStaticShape(%group, %name, %shape) {
 	EditorRegistry::addObject(%group, %name, StaticShape, %shape, false);
 }
 
+// used by remote editor to mirror server
+function EditorRegistry::addDummy(%group, %name) {
+	EditorRegistry::addScript(%group, %name, "");
+}
+
 function EditorRegistry::clearGroup(%group) {
 	adel(EditorRegistry::groupNames(%group));
 	adel(EditorRegistry::groupScripts(%group));
@@ -66,5 +71,3 @@ function EditorRegistry::defaults() {
 	for (%dis = File::findFirst("*.dis"); %dis != ""; %dis = File::findNext("*.dis"))
 		EditorRegistry::addDIS(Interior, File::getBase(%dis), %dis);
 }
-
-schedule("EditorRegistry::addDefaults();", 0);

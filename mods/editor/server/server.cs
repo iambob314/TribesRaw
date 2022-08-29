@@ -8,7 +8,7 @@
 
 exec("editor\\server\\newmission.cs");
 
-exec("editor\\server\\remote.cs");
+exec("editor\\server\\remotes.cs");
 
 function Editor::initServer(%port) {
 	// Create serverDelegate (server socket, etc.)

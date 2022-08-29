@@ -20,3 +20,8 @@ function Gui::newWindow(%name, %gui, %title) {
 	
 	return %win;
 }
+
+function cursorToggle(%win) {
+	if (isCursorOn(%win)) cursorOff(%win);
+	else                  cursorOn(%win);
+}

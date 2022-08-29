@@ -18,6 +18,7 @@ bindCommand(keyboard, make, f3, to, "EditorUI::showMode(Create);");
 bindCommand(keyboard, make, f4, to, "EditorUI::showMode(Ted);");
 bindCommand(keyboard, make, f5, to, "EditorUI::hide();");
 bindCommand(keyboard, make, f9, to, "EditorUI::toggleHelp();");
+bindCommand(keyboard, make, "?", to, "EditorUI::toggleHelp();");
 bindCommand(keyboard, make, o, to, "EditorUI::toggleOptions();");
 
 //
