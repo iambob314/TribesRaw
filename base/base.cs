@@ -36,7 +36,7 @@ function base::init() {
 	
 	// Load all mods specified by command line args
 	%modsToLoad = $modList;
-	for (%i = 0; (%modname = getWord(%modsToLoad, %i)) != -1; %i++) requireMod(%modname);
+	for (%i = 0; (%modname = getWord(%modsToLoad, %i)) != -1; %i++) requireMod(%modname, true);
 
 	echo("Tribes initialized");
 }
