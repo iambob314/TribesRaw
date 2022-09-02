@@ -1,5 +1,7 @@
+exec("std\\array.cs");  
+exec("std\\group.cs"); 
+exec("std\\string.cs"); 
+exec("std\\util.cs");  
+exec("std\\vector.cs");
 
-exec("std\\util.cs");   // general utils
-exec("std\\string.cs"); // string manipulation
-exec("std\\array.cs");  // array library
-exec("std\\args.cs");   // helpers for $argv
+exec("std\\args.cs"); // depends on array.cs

@@ -202,7 +202,6 @@ function afromwords(%s, %a) {
 	for (%i = 0; (%w = getWord(%s, %i)) != -1; %i++) apush(%w, %a);
 }
 
-
 // afromvar clears %a and loads it with the elements from the array-variable named %vn, up
 // to %vl elements (or if omitted, up to first "" value).
 //
