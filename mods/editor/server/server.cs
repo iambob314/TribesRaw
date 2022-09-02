@@ -8,6 +8,7 @@
 
 exec("editor\\server\\newmission.cs");
 
+exec("editor\\server\\reditor.cs");
 exec("editor\\server\\remotes.cs");
 
 function Editor::initServer(%port) {
@@ -49,4 +50,7 @@ function Editor::spawn(%clientId) {
 
 // Server-side events
 
-function Server::onClientDisconnect(%clientId) { echo("Server::onClientDisconnect ", %clientId); }
+function Server::onClientDisconnect(%clientId) {
+	echo("Server::onClientDisconnect ", %clientId);
+	REditor::cleanup(%clientId);
+}

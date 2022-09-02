@@ -26,8 +26,11 @@ function remoteEditor::downloadComplete(%serverId) { echo("editor registry downl
 function Editor::setControlMode(%m) { remoteEval(2048, Editor::setControlMode, %m); }
 
 // Editor::castSelect does a remote editor raycast selection
-function Editor::castSelect() { remoteEval(2048, Editor::castSelect); }
-
-function remoteEditor::onSelect(%serverId, %obj) {
-	echos("HIT", %obj);
+function Editor::castSelect(%m) { remoteEval(2048, Editor::castSelect, %m); }
+function Editor::castSelectMods() {
+	if ($Editor::ModShift)     Editor::castSelect(add);
+	else if ($Editor::ModCtrl) Editor::castSelect(rem);
+	else                       Editor::castSelect();
 }
+
+function Editor::createObject(%group, %name) { remoteEval(2048, Editor::createObject, %group, %name); }

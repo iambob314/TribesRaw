@@ -21,34 +21,52 @@ function Editor::sendRegGroup(%clientId, %group) {
 // Remote editor control stuff
 //
 
-function remoteEditor::setControlMode(%clientId, %mode) {
-	if (%mode == Player) {
-		%obj = Client::getOwnedObject(%clientId);
-	} else if (%mode == Observer) {
-		%obj = Client::getObserverCamera(%clientId);
-	}
+function remoteEditor::setControlMode(%clientId, %mode) { REditor::setMode(%clientId, %mode); }
+function remoteEditor::setDropMode(%clientId, %mode) { REditor::setDropMode(%clientId, %mode); }
 
-	if (%obj != "") Client::setControlObject(%clientId, %obj);
+// Effect of hit/miss on selection set by %mode:
+// ""  -> set/clear
+// add -> add/nothing
+// rem -> rem/nothing
+function remoteEditor::castSelect(%clientId, %mode) {
+	%hit = REditor::LOS(%clientId);
+	if (%hit) {
+		%obj = $los::object;
+		%objName = getObjectType(%obj);
+		if (%dn = GameBase::getDataName(%obj)) %objName = %objName @ " " @ %dn;
+		if (%name = Object::getName(%obj))     %objName = %name @ " (" @ %objName @ ")";
+	}
+	
+	if (%mode == add) {
+		if (%hit) {
+			REditor::sel::add(%clientId, %obj);
+			REditor::msg(%clientId, "sel add " @ %objName);
+		}
+	} else if (%mode == rem) {
+		if (%hit) {
+			REditor::sel::remove(%clientId, %obj);
+			REditor::msg(%clientId, "sel remove " @ %objName);
+		}
+	} else {
+		if (%hit) {
+			REditor::sel::set(%clientId, %obj);
+			REditor::msg(%clientId, "sel set " @ %objName);
+		} else {
+			REditor::sel::clear(%clientId);
+			REditor::msg(%clientId, "sel clear");
+		}
+	}
 }
 
+function remoteEditor::createObject(%clientId, %group, %name) {
+	%arglist = EditorRegistry::getArglist(%group, %name);
+	if (%arglist == "") { REditor::msgError(%clientId, "bad object " @ %group @ "/" @ %name); return; }
 
-function remoteEditor::castSelect(%clientId) {
-	%obj = Client::getControlObject(%clientId);
+	%x = eval("newObject(" @ %arglist @ ");");
+	if (!isObject(%x)) { REditor::msgError(%clientId, "error creating object"); return; }
+
+	addToSet(MissionGroup, %x);
 	
-	if (%obj == Client::getObserverCamera(%clientId)) {
-		%pos = GameBase::getPosition(%obj);
-		%dir = Vector::getFromRot(GameBase::getRotation(%obj), 1000);
-		%pos2 = Vector::add(%pos, %dir);
-		
-		%mask = ~($ObjectType::Terrain | $ObjectType::Container | $ObjectType::Default);
-		%hit = getLOSInfo(%pos, %pos2, %mask);
-	} else {
-		%hit = GameBase::getLOSInfo(%obj, 1000) && getObjectType($los::object) != SimTerrain;
-	}
-	
-	if (!%hit) $los::object = $los::position = "";
-	echos("HIT", getObjectType($los::object), $los::object, $los::position);
-	
-	%clientId.selected = $los::object;
-	remoteEval(%clientId, Editor::onSelect, %clientId.selected);
+	REditor::sel::set(%clientId, %x);
+	REditor::dropSelection(%clientId);
 }
