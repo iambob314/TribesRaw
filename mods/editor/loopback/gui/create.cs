@@ -10,17 +10,13 @@ function EditorUI::Create::show() {
 // GUI controls
 //
 
-function Editor::createObject(%group, %name) { // called from common editor\gui\create.cs
-	%namesArr = EditorRegistry::groupNames(%group);
-	%scriptsArr = EditorRegistry::groupScripts(%group);
-
-	if ((%idx = afind(%name, %namesArr)) == -1)
-		return; // clicked something not in array?? should never happen
-
-	%script = aget(%idx, %scriptsArr);
-	echos("TODO", %idx, %name, %script);
-	%x = eval(%script);
-	echo(%x);
+function Editor::onCreateObject(%group, %name) { // called from common editor\gui\create.cs
+	%arglist = EditorRegistry::getArglist(%group, %name);
+	echos("About to create", %group, %name, %arglist);
+	if (%arglist == "") return;
+	
+	%x = eval("MissionCreateObject(" @ %arglist @ ");");
+	echos("Created", %x);
 }
 
 // MissionObjectList in inspect.cs

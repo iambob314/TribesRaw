@@ -4,7 +4,7 @@
 
 //
 // Defined in {loopback,remote}/gui/create.cs:
-// * Editor::createObject(%group, %name)
+// * Editor::onCreateObject(%group, %name)
 //
 
 function EditorUI::refreshCreatorLists() {
@@ -22,5 +22,5 @@ function GroupList::onAction() {
 function NameList::onAction() {
 	%group = Control::getValue(GroupList);
 	%name = Control::getValue(NameList);
-	Editor::createObject(%group, %name);
+	Editor::onCreateObject(%group, %name);
 }

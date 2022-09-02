@@ -10,7 +10,7 @@ function EditorUI::Create::show() {
 // GUI controls
 //
 
-function Editor::createObject(%group, %name) { // called from common editor\gui\create.cs
+function Editor::onCreateObject(%group, %name) { // called from common editor\gui\create.cs
 	echos("TIME TO CREATE", %group, %name);
 }
 
