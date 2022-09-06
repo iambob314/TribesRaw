@@ -50,8 +50,7 @@ function REditor::setOptions(%c, %snaps, %rsnap, %constrs, %dropMode, %plane) {
 //
 
 function REditor::copyDelSel(%c, %copy, %del) {
-	%objArr = afromset(REditor::sel(%c));
-
+	%objArr = REditor::sel::arr(%c);
 	if (%copy) REditor::saveObjects(%c, "clipbuffer", false, %objArr);
 	if (%del)  REditor::astack::doAndPush(%c, REditor::action::delete::make(%c, %objArr));
 }
@@ -68,12 +67,12 @@ function REditor::undo(%c)            { REditor::astack::popAndDo(%c, $REditor::
 function REditor::redo(%c)            { REditor::astack::popAndDo(%c, $REditor::redo); }
 
 function REditor::dropSelection(%c) {
-	if ((%l = REditor::sel::len(%c)) != 1) {
+	%objArr = REditor::sel::arr(%c);
+	if (alen(%objArr) != 1) {
 		if (%l > 1) REditor::msgErr(%c, "cannot drop multiple objects");
 		return;
 	}
-	
-	%obj = Group::getObject(REditor::sel(%c), 0);
+	%obj = aget(0, %objArr);
 
 	if ((%pos = REditor::getDropPos(%c)) != "") GameBase::setPosition(%obj, %pos);
 	if ((%rot = REditor::getDropRot(%c)) != "") GameBase::setRotation(%obj, %rot);

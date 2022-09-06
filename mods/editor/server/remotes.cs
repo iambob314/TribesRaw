@@ -67,12 +67,12 @@ function remoteEditor::castSelect(%clientId, %mode) {
 	
 	if (%mode == add) {
 		if (%hit) {
-			REditor::sel::add(%clientId, afromval(%obj));
+			REditor::sel::add(%clientId, %obj);
 			REditor::msg(%clientId, "sel add " @ %objName);
 		}
 	} else if (%mode == rem) {
 		if (%hit) {
-			REditor::sel::remove(%clientId, afromval(%obj));
+			REditor::sel::remove(%clientId, %obj);
 			REditor::msg(%clientId, "sel remove " @ %objName);
 		}
 	} else {
@@ -80,7 +80,7 @@ function remoteEditor::castSelect(%clientId, %mode) {
 			REditor::sel::set(%clientId, afromval(%obj));
 			REditor::msg(%clientId, "sel set " @ %objName);
 		} else {
-			REditor::sel::clear(%clientId);
+			adel(REditor::sel(%clientId));
 			REditor::msg(%clientId, "sel clear");
 		}
 	}
