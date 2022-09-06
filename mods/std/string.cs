@@ -49,3 +49,18 @@ function String::stripSuffix(%s, %suff) {
 	else
 		return %s;
 }
+
+// String::prefix returns prefix of %s up to first occurrence of %split (or %s if no occurrence).
+// If %split == "", %split = " " is used.
+function String::prefix(%s, %split) {
+	%split = def(%split, " ");
+	if ((%idx = String::findSubStr(%s, %split)) == -1) return %s;
+	return String::substr(%s, 0, %idx);
+}
+// String::suffix returns suffix of %s after first occurrence of %split (or "" if no occurrence).
+// If %split == "", %split = " " is used.
+function String::suffix(%s, %split) {
+	%split = def(%split, " ");
+	if ((%idx = String::findSubStr(%s, %split)) == -1) return "";
+	return String::substr(%s, %idx + String::len(%split));
+}
