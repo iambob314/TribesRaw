@@ -21,7 +21,7 @@ function Editor::sendRegGroup(%clientId, %group) {
 // Remote editor control stuff
 //
 
-function remoteEditor::setControlMode(%clientId, %mode) { REditor::setMode(%clientId, %mode); }
+function remoteEditor::setMode(%clientId, %mode) { REditor::setMode(%clientId, %mode); }
 function remoteEditor::setOptions(%clientId, %dropMode) {
 	REditor::setOptions(%clientId, %dropMode);
 }

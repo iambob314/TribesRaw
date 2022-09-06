@@ -12,18 +12,16 @@ function Editor::downloadRegistry() {
 	EditorRegistry::clear();
 	remoteEval(2048, Editor::downloadRegistry);
 }
-
 function remoteEditor::addRegistryEntry(%serverId, %group, %name) {
 	EditorRegistry::addDummy(%group, %name);
 }
-
 function remoteEditor::downloadComplete(%serverId) { echo("editor registry downloaded"); }
 
 //
 // Remote editor control stuff
 //
 
-function Editor::setControlMode(%m) { remoteEval(2048, Editor::setControlMode, %m); }
+function Editor::setMode(%m)    { remoteEval(2048, Editor::setMode, %m); }
 function Editor::setOptions(%m) {
 	%dropMode = Editor::getDropMode();
 	remoteEval(2048, Editor::setOptions, %dropMode);

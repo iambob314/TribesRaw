@@ -11,12 +11,8 @@ exec("editor\\server\\reditor\\actions.cs");
 // Messaging
 //
 
-function REditor::msg(%c, %msg) {
-	Client::sendMessage(%c, $MsgType::Green, %msg);
-}
-function REditor::msgError(%c, %msg) {
-	Client::sendMessage(%c, $MsgType::Red, %msg);
-}
+function REditor::msg(%c, %msg)    { Client::sendMessage(%c, $MsgType::Green, %msg); }
+function REditor::msgErr(%c, %msg) { Client::sendMessage(%c, $MsgType::Red, %msg); }
 
 //
 // Modes
@@ -69,7 +65,7 @@ function REditor::redo(%c)            { REditor::astack::popAndDo(%c, $REditor::
 
 function REditor::dropSelection(%c) {
 	if ((%l = REditor::sel::len(%c)) != 1) {
-		if (%l > 1) REditor::msgError(%c, "cannot drop multiple objects");
+		if (%l > 1) REditor::msgErr(%c, "cannot drop multiple objects");
 		return;
 	}
 	
@@ -81,7 +77,7 @@ function REditor::dropSelection(%c) {
 
 function REditor::createObject(%c, %group, %name) {
 	%arglist = EditorRegistry::getArglist(%group, %name);
-	if (%arglist == "") { REditor::msgError(%c, "bad object " @ %group @ "/" @ %name); return; }
+	if (%arglist == "") { REditor::msgErr(%c, "bad object " @ %group @ "/" @ %name); return; }
 	
 	REditor::astack::doAndPush(%c, REditor::action::create::make(%c, %arglist));
 }	

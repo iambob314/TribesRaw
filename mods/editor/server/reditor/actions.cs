@@ -57,7 +57,7 @@ function REditor::action::create::make(%c, %arglist) {
 
 function REditor::action::create::do(%c, %arglist) {
 	%x = eval("newObject(" @ %arglist @ ");");
-	if (!isObject(%x)) { REditor::msgError(%c, "error creating object"); return; }
+	if (!isObject(%x)) { REditor::msgErr(%c, "error creating object"); return; }
 
 	addToSet(REditor::sandboxGroup(%c), %x);
 

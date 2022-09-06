@@ -28,12 +28,10 @@ $EditorUI::allControls = "MEObjectList Inspector Creator";
 // * Player: player
 // * Observer: observer camera
 function Editor::focusInput(%m) {
-	assert($Editor::validInputMode[%m], "bad mode '" @ %m @ "'");
+	assert(%m == Player || %m == Observer, "bad mode '" @ %m @ "'");
 
 	if (%m == Player) popActionMap("remoteEditor.sae");
 	else              pushActionMap("remoteEditor.sae");
 
-	Editor::setControlMode(%m);
+	Editor::setMode(%m);
 }
-$Editor::validInputMode[Player] = true;
-$Editor::validInputMode[Observer]  = true;

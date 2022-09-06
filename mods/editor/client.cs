@@ -12,8 +12,10 @@ function Editor::initClient() {
 	// Load other vols
 	newObject(EntitiesVolume, SimVolume, "baseres\\shapes\\entities.vol"); // required: vols with DTS must be explicitly loaded, don't sync from instant group it seems
 	
+	// Create MainWindow
 	GUI::newWindow(MainWindow, "mainmenu.gui");
 
+	// Create client delegate to connect
 	newObject(clientDelegate, FearCSDelegate, false, "IP", 0, "IPX", 0, "LOOPBACK", 0);
 	//translateMasters(); // TODO: ???
 }
