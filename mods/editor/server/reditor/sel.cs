@@ -33,6 +33,7 @@ function REditor::sel::add(%c, %obj) {
 }
 
 function REditor::sel::remove(%c, %obj) {
+	%sel = REditor::sel(%c);
 	if ((%at = REditor::sel::find(%c, %obj)) != -1)
 		asetpop(%at, %sel);
 }

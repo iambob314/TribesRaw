@@ -19,14 +19,17 @@ function REditor::deleteObjectFile(%c, %filebase) {
 function REditor::saveObjects(%c, %filebase, %append, %objArr) {
 	%filename = "temp\\" @ %filebase @ "." @ %c @ ".cs";
 	
+	// WOW: exportObjectToScript *only* recognizes literal "true", so coerce truthy value
+	%clearFile = tern(!%append, true, false);
+	
 	for (%obj = aitfirst(%objArr); !aitdone(%objArr); %obj = aitnext(%objArr)) {
 		%oldLevel = $Console::printLevel;
 		$Console::printLevel = 0; // silence logging due to "return string: 0" spam
-		exportObjectToScript(%obj, %filename, !%append, %append, false);
-		$Console::printLevel = %oldLevel; 
+		exportObjectToScript(%obj, %filename, %clearFile, true, false);
+		$Console::printLevel = %oldLevel;
 		
-		if (!%append) base::refreshSearchPath();
-		%append = true; // always append for 2nd iteration and on
+		if (%clearFile) base::refreshSearchPath();
+		%clearFile = false; // stop clearing after first object
 	}
 	
 	return %objArr;
