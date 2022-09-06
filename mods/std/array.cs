@@ -14,7 +14,6 @@
 //
 // Functions (all take optional final arg. for array name, or none for default array):
 // * alen()       : length
-// * adel()       : delete array
 // * aget(%i)     : get element %i
 // * aset(%i,%v)  : set element %i to %v
 // * aclr(%i)     : clear element %i
@@ -27,7 +26,6 @@
 // * acopy(%b)    : append array's elements to other array %b
 // * acompact()   : shift non-"" elements left to replace "" elements
 // * asort()      : sort array
-// * astr()       : stringify array (space-separated elements)
 //
 // * aitfirst()         : start iteration, return first
 // * aitnext()          : continue iteration, return next
@@ -37,15 +35,25 @@
 // * ado2(%f,%k,%a,...) : iterate %a, call %f with ... args but replace %k'th arg with the element
 //                        (NB: %a arg precedes ... args, not last as usual)
 //
-// Constructors (same as above, but also returns array):
+// Destructors (args as above):
+// * adel()      : delete array (release all memory)
+// * adellater() : delete array on schedule(..., 0) (after call stack returns)
+//
+// Constructors (args as above, but also return an array):
 // * anew()            : returns new (unique) empty array (note: takes no args)
 // * atmp()            : returns new (unique) empty temporary array. auto-deleted on
 //                       schedule(..., 0) (note: takes no args)
+// * afromval(%v)      : make array with single element %v
 // * afroma(%b)        : make array as a copy of array %b
 // * afromwords(%s)    : make array from the words in %s (clears array first)
 // * afromvar(%vn,%vl) : make array from global var named %vn (if %vn == "$abc", use values
 //                       $abc[%i]), up to len %vl (or if omitted, up to first "" value)
 // * afromset(%set)    : make array from object IDs in SimSet/SimGroup/etc. %set
+//
+// Conversions:
+// * astr()       : stringify array (space-separated elements)
+// * atowords()   : synonym for astr
+// * atoset(%set) : add all elements to SimSet/SimGroup/etc. %set
 //
 // Internal storage for array %a:
 // $_a_[%a] = len;  // if "", then array is unused
@@ -170,6 +178,13 @@ function adel(%a) {
 	$_a_[%a] = "";
 }
 
+// adellater deletes an entire array on schedule(..., 0) and returns the array (which is still
+// valid until the current call stack returns).
+function adellater(%a) {
+	schedule("adel(" @ %a @ ");", 0);
+	return %a;
+}
+
 // acopy appends all elements of array %a to array %b.
 // Clear %b first if you want an exact copy of %a.
 function acopy(%b, %a) {
@@ -213,14 +228,6 @@ function asubsort(%i, %j, %a) {
 	asubsort(%pi+1, %j, %a);
 }
 
-// astr returns the content of an array as a string (space-separated values)
-function astr(%a) {
-	%l = alen(%a);
-	%s = "" @ aget(0, %a);
-	for (%i = 1; %i < %l; %i++) %s = %s @ " " @ aget(%i, %a);
-	return %s;
-}
-
 // aidx coerces %i to a valid index (integer-ifying), returning "" if not valid for the array (out of bounds)
 // (this is primarily a helper function for this file)
 function aidx(%i, %a) {
@@ -243,12 +250,18 @@ function anew() {
 	return %id;	
 }
 
-// atmp returns a temporary array. The array is automatically cleaned up by schedule(..., 0),
-// so copy it if you need it longer.
+// atmp returns a temporary array that will be automatically cleaned up as per adellater().
+// This is equivalent to adellater(anew()).
 function atmp() {
-	%id = anew();
-	schedule("adel(" @ %id @ ");", 0); // auto cleanup
-	return %id;
+	return adellater(anew());
+}
+
+// afromval clears %a, loads it with a single element %v, and returns %a.
+// It's equivalent to adel(%a); apush(%v, %a);
+function afromval(%v, %a) {
+	adel(%a);
+	apush(%v, %a);
+	return %a;
 }
 
 // afroma clears %a, loads it with the contents of %b, and returns %a.
@@ -285,5 +298,23 @@ function afromset(%set, %a) {
 	adel(%a);
 	for (%i = 0; (%obj = Group::getObject(%set, %i)) != -1; %i++) apush(%obj, %a);
 	return %a;
+}
+
+// astr returns the content of an array as a string (space-separated values)
+function astr(%a) {
+	%l = alen(%a);
+	%s = "" @ aget(0, %a);
+	for (%i = 1; %i < %l; %i++) %s = %s @ " " @ aget(%i, %a);
+	return %s;
+}
+
+// atowords is a synonym for astr.
+function atowords(%a) { return astr(%a); }
+
+// atoset adds all values in %a to set %set.
+// Note: this does not clear %set before adding elements.
+function atoset(%set, %a) {
+	for (%obj = aitfirst(%a); !aitdone(%a); %obj = aitnext(%a))
+		addToSet(%set, %obj);
 }
 

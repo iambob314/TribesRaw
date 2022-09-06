@@ -27,3 +27,8 @@ function Group::len(%g) {
 	}
 	return %ub;
 }
+
+function Group::clear(%g) {
+	for (%i = 0; (%obj = getWord(%g, %i)) != -1; %i++)
+		removeFromSet(%g, %obj);
+}

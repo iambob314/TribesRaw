@@ -1,4 +1,4 @@
-function String::length(%str) {
+function String::len(%str) {
   if (%str == "") return 0;
   %lb = 0;
   for (%ub = 1; %ub < (1<<16) && String::getSubStr(%str, %ub, 1) != ""; %ub <<= 1) %lb = %ub;
@@ -26,7 +26,7 @@ $escFixTable["P"] = "F";
 
 function String::escape(%str) {
   %str = escapeString(%str);
-  %l = String::length(%str);
+  %l = String::len(%str);
   %outstr = "";
   while ((%idx = String::findSubStr(%str, "\\x")) != -1) {
 	%c1 = $escFixTable[String::getSubStr(%str, %idx+2, 1)];
@@ -38,8 +38,8 @@ function String::escape(%str) {
 }
 
 function String::stripSuffix(%s, %suff) {
-	%l = String::length(%s);
-	%suffL = String::length(%suff);
+	%l = String::len(%s);
+	%suffL = String::len(%suff);
 	if (%suffL > %l) return %s;
 	
 	%preL = %l - %suffL;
