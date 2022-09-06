@@ -9,7 +9,8 @@
 // * %i, %j: an array index
 // * %v:     a value
 //
-// N.B.: *always* clean up unused arrays using adel, as otherwise they will accumulate indefinitely.
+// N.B.: *always* clean up unused arrays using adel, as otherwise they will
+//       accumulate indefinitely (exception: atmp() arrays auto cleanup).
 //
 // Functions (all take optional final arg. for array name, or none for default array):
 // * alen()       : length
@@ -20,8 +21,10 @@
 // * aswap(%i,%j) : swap elements %i and %j
 // * apush(%v)    : append %v as last
 // * apop()       : pop last
+// * asetpop(%i)  : set element %i to last element's value, then pop
 // * afind(%v)    : first index of %v, or -1 if not found
 //
+// * acopy(%b)    : append array's elements to other array %b
 // * acompact()   : shift non-"" elements left to replace "" elements
 // * asort()      : sort array
 // * astr()       : stringify array (space-separated elements)
@@ -34,50 +37,71 @@
 // * ado2(%f,%k,%a,...) : iterate %a, call %f with ... args but replace %k'th arg with the element
 //                        (NB: %a arg precedes ... args, not last as usual)
 //
+// Constructors (same as above, but also returns array):
+// * anew()            : returns new (unique) empty array (note: takes no args)
+// * atmp()            : returns new (unique) empty temporary array. auto-deleted on
+//                       schedule(..., 0) (note: takes no args)
+// * afroma(%b)        : make array as a copy of array %b
 // * afromwords(%s)    : make array from the words in %s (clears array first)
-// * afromvar(%vn,%vl) : make array from global var named %vn (if %vn == "$abc", use values $abc[%i]), up to len %vl (or if omitted, up to first "" value)
+// * afromvar(%vn,%vl) : make array from global var named %vn (if %vn == "$abc", use values
+//                       $abc[%i]), up to len %vl (or if omitted, up to first "" value)
+// * afromset(%set)    : make array from object IDs in SimSet/SimGroup/etc. %set
 //
 // Internal storage for array %a:
-// $_a[%a] = len;  // if "", then array is unused
-// $_a[%a, ""] = cur idx (for iteration)
-// $_a[%a, %i] = %i'th value;
+// $_a_[%a] = len;  // if "", then array is unused
+// $_a_[%a, ""] = cur idx (for iteration)
+// $_a_[%a, %i] = %i'th value;
+//
+// Other internals:
+// $_anext = next new array idx
 //
 
-function alen(%a) { return def($_a[%a], 0); }
+// alen returns the array's length
+function alen(%a) { return def($_a_[%a], 0); }
 
 // aget gets the value at an array index (or "" if invalid index)
 function aget(%i, %a) {
 	if ((%i = aidx(%i, %a)) == "") return "";
-	return $_a[%a, %i];
+	return $_a_[%a, %i];
 }
 
 // aset sets the value at an array index (cannot set past end of array; no-op if invalid index)
 function aset(%i, %v, %a) {
-	if ((%i = aidx(%i, %a)) != "")
-		return $_a[%a, %i];
+	if ((%i = aidx(%i, %a)) == "") return "";
+	return $_a_[%a, %i] = %v;
 }
 
-// adel clears a value at an array index to ""; equivalent to aset(%i, "", %a)
+// adel clears a value at an array index to "".
+// It is equivalent to aset(%i, "", %a).
+// Note: this does not _remove_ the element; to fully remove an element, follow with a call to
+// acompact, or use asetpop instead.
 function aclr(%i, %a) { aset(%i, "", %a); }
 
 // aswap swaps two elements in an array (no-op if invalid either index is invalid)
 function aswap(%i, %j, %a) {
 	if ((%i = aidx(%i, %a)) == "" || (%j = aidx(%j, %a)) == "" || %i == %j) return;
-	%tmp = $_a[%a, %i];
-	$_a[%a, %i] = $_a[%a, %j];
-	$_a[%a, %j] = %tmp;
+	%tmp = $_a_[%a, %i];
+	$_a_[%a, %i] = $_a_[%a, %j];
+	$_a_[%a, %j] = %tmp;
 }
 
 // apush appends a new last element to an array
 function apush(%v, %a) {
-	$_a[%a, $_a[%a]++ - 1] = %v;
+	$_a_[%a, $_a_[%a]++ - 1] = %v;
 }
 
 // apop removes and returns the last element of an array (or "" if empty)
 function apop(%a) {
 	if (alen(%a) == 0) return "";
-	%v = $_a[%a, $_a[%a]--];
+	%v = $_a_[%a, $_a_[%a]--];
 	return %v;
+}
+
+// asetpop sets element %i to the last element's value, then pops the last element (no-op if empty)
+// It is equivalent to aset(%i, apop(%a), %a).
+// It is an efficient way to delete element %i if you don't care about the array's order.
+function asetpop(%i, %a) {
+	aset(%i, apop(%a), %a);
 }
 
 // afind finds value %v in an array, returning its index or -1 if not found
@@ -92,25 +116,31 @@ function afind(%v, %a) {
 
 
 // aitfirst starts a new iteration on an array and returns the first value
-// Note: only one iteration may be active on an array at a time; code iterating should be careful that a called
-//       function does not inadvertently clobber the iterator.
+// Note: only one iteration may be active on an array at a time; code iterating should
+//       be careful that a called function does not inadvertently clobber the iterator.
 function aitfirst(%a) {
-	$_a[%a, ""] = "";
-	return aget(ait(%a), %a);
+	$_a_[%a, ""] = "";
+	return aitval(%a);
 }
 
 // aitnext advances an array's iterator and returns the new value (no-op if iteration is done)
 function aitnext(%a) {
 	if (aitdone(%a)) return "";
-	$_a[%a, ""]++;
-	return aget(ait(%a), %a);
+	$_a_[%a, ""]++;
+	return aitval(%a);
 }
 
 // aitdone returns true iff after aitfirst/aitnext has stepped past the end of the iterator
 function aitdone(%a) { return ait(%a) == alen(%a); }
 
 // ait returns current index of the active iterator (or 0 if none active)
-function ait(%a) { return def($_a[%a, ""], 0); }
+function ait(%a) { return def($_a_[%a, ""], 0); }
+
+// aitval returns current element of the active iterator (or "" if none active)
+function aitval(%a) {
+	if (aitdone(%a)) return "";
+	return aget(ait(%a), %a);
+}
 
 // ado iterates over an array, calling %f(%a0, %a1, ..., %v) for each element %v
 function ado(%f, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
@@ -135,8 +165,15 @@ function ado2(%f, %k, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
 // adel deletes an entire array
 function adel(%a) {
 	%l = alen(%a);
-	for (%i = 0; %i < %l; %i++) $_a[%a, %i] = "";
-	$_a[%a] = "";
+	for (%i = 0; %i < %l; %i++) $_a_[%a, %i] = "";
+	$_a_[%a, ""] = "";
+	$_a_[%a] = "";
+}
+
+// acopy appends all elements of array %a to array %b.
+// Clear %b first if you want an exact copy of %a.
+function acopy(%b, %a) {
+	for (%v = aitfirst(%a); !aitdone(%a); %v = aitnext(%a)) apush(%v, %b);
 }
 
 // acompact "compacts" an array, removing all "" values by shifting non-"" values left to fill
@@ -149,7 +186,7 @@ function acompact(%a) {
 			%nl++;
 		}
 	}
-	$_a[%a] = %nl;
+	$_a_[%a] = %nl;
 }
 
 // asort sorts an array
@@ -193,17 +230,44 @@ function aidx(%i, %a) {
 
 
 //
-// Mass constructors
+// Constructors
 //
 
-// afromwords clears %a and loads it with the words from %s as elements.
+// atmp returns a new array (arbitrary unique ID). You must clean it up (adel) yourself.
+function anew() {
+	// OK to use prefix underscore, because $_a_["_tmp" @ %j] cannot match
+	// $_a_[%a, %i] or $_a_[%a, ""]. Users are not supposed to use _ in their
+	// array names, so this keeps us in a separate namespace.
+	%id = "_tmp" @ ($_anext++ - 1);
+	adel(%id);
+	return %id;	
+}
+
+// atmp returns a temporary array. The array is automatically cleaned up by schedule(..., 0),
+// so copy it if you need it longer.
+function atmp() {
+	%id = anew();
+	schedule("adel(" @ %id @ ");", 0); // auto cleanup
+	return %id;
+}
+
+// afroma clears %a, loads it with the contents of %b, and returns %a.
+// It's equivalent to adel(%a); acopy(%b, %a);
+function afroma(%b, %a) {
+	adel(%a);
+	acopy(%b, %a);
+	return %a;
+}
+
+// afromwords clears %a, loads it with the words from %s as elements, and returns %a.
 function afromwords(%s, %a) {
 	adel(%a);
 	for (%i = 0; (%w = getWord(%s, %i)) != -1; %i++) apush(%w, %a);
+	return %a;
 }
 
-// afromvar clears %a and loads it with the elements from the array-variable named %vn, up
-// to %vl elements (or if omitted, up to first "" value).
+// afromvar clears %a, loads it with the elements from the array-variable named %vn, up
+// to %vl elements (or if omitted, up to first "" value), and returns %a.
 //
 // Example: afromvar("$abc", 3, %a) loads $abc[0], $abc[1], $abc[2] into %a
 function afromvar(%vn, %vl, %a) {
@@ -213,5 +277,13 @@ function afromvar(%vn, %vl, %a) {
 		if (%vl == "" && %v == "") break;
 		apush(%v, %a);
 	}
+	return %a;
+}
+
+// afromset clears %a, loads it with all object IDs in the given set, and returns %a.
+function afromset(%set, %a) {
+	adel(%a);
+	for (%i = 0; (%obj = Group::getObject(%set, %i)) != -1; %i++) apush(%obj, %a);
+	return %a;
 }
 
