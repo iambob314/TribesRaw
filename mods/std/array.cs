@@ -29,6 +29,8 @@
 // * apop()       : pop last
 // * asetpop(%i)  : set element %i to last element's value, then pop
 // * afind(%v)    : first index of %v, or -1 if not found
+// * afirst()     : first element
+// * alast()      : last element
 //
 // * acopy(%b)    : append array's elements to other array %b
 // * acompact()   : shift non-"" elements left to replace "" elements
@@ -129,6 +131,24 @@ function asetpop(%i, %a) {
 	achk(%a);
 	aset(%i, apop(%a), %a);
 }
+
+// afind finds value %v in an array, returning its index or -1 if not found
+function afind(%v, %a) {
+	achk(%a);
+	%l = alen(%a);
+	for (%i = 0; %i < %l; %i++)
+		if (aget(%i, %a) == %v)
+			return %i;
+	return -1;
+}
+
+// afirst returns the first value in an array, or "" if the array is empty.
+// It's equivalent to aget(0, %a).
+function afirst(%a) { return aget(0, %a); }
+
+// alast returns the last value in an array, or "" if the array is empty.
+// It's equivalent to aget(alen(%a)-1, %a).
+function alast(%a) { return aget(alen(%a)-1, %a); }
 
 // afind finds value %v in an array, returning its index or -1 if not found
 function afind(%v, %a) {
