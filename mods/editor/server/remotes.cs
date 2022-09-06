@@ -34,6 +34,10 @@ function remoteEditor::dropSelection(%clientId)   { REditor::dropSelection(%clie
 function remoteEditor::undo(%clientId)   { REditor::undo(%clientId); }
 function remoteEditor::redo(%clientId)   { REditor::redo(%clientId); }
 
+function remoteEditor::createObject(%clientId, %group, %name) {
+	REditor::createObject(%clientId, %group, %name);
+}
+
 // Effect of hit/miss on selection set by %mode:
 // ""  -> set/clear
 // add -> add/nothing
@@ -66,19 +70,4 @@ function remoteEditor::castSelect(%clientId, %mode) {
 			REditor::msg(%clientId, "sel clear");
 		}
 	}
-}
-
-function remoteEditor::createObject(%clientId, %group, %name) {
-	%arglist = EditorRegistry::getArglist(%group, %name);
-	if (%arglist == "") { REditor::msgError(%clientId, "bad object " @ %group @ "/" @ %name); return; }
-
-	%x = eval("newObject(" @ %arglist @ ");");
-	if (!isObject(%x)) { REditor::msgError(%clientId, "error creating object"); return; }
-
-	addToSet(MissionGroup, %x);
-
-	echos("wow", %x, %arglist);
-	
-	REditor::sel::set(%clientId, afromval(%x));
-	REditor::dropSelection(%clientId);
 }
