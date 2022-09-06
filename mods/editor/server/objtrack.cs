@@ -3,13 +3,16 @@
 // object is deleted and a new object reuses the same ID. This allows us to keep arrays of object
 // IDs safely, rather than converting to/from sets everywhere.
 //
+// A "versioned object" is an object ID/version pair "objID vID", and can be a useful way to
+// track stable (sets of) object(s). Converters to/from normal object IDs are included.
+//
 // Method: basic idea is to keep a global SimSet, along with a version ID for each object ID:
 // * Whenever an object is added: set version ID to current
 // * Whenever an object is checked: if in set, return version; else clear version and return ""
 // If an object is deleted, it is reliabily removed from the set, so check yields "".
 // If it's later recreated/retracked, it will have a new version ID.
 // Together, this means a check after object delete will always return a new version ID (or "").
-// 
+//
 
 $objTracker = newObject("ObjTracker", SimSet);
 
@@ -34,26 +37,45 @@ function ObjTracker::check(%obj) {
 	return "";
 }
 
-// ObjTracker::vobjArray converts an array of object IDs to an array of "versioned objects"
-// with form "objID versionID", skipping any non-existent objects.
-function ObjTracker::vobjArray(%objArr, %vobjArr) {
+function ObjTracker::toVObj(%obj) {
+	if ((%v = ObjTracker::add(%obj)) == "") return "";
+	return %obj @ " " @ %v;
+}
+
+function ObjTracker::fromVObj(%vobj) {
+	%obj = getWord(%vobj, 0);
+	%v = getWord(%vobj, 1);
+	if (ObjTracker::check(%obj) != %v) return "";
+	return %obj;
+}
+
+// ObjTracker::toVObjs creates a "versioned object" array from an array of object IDs,
+// skipping any non-existent objects.
+function ObjTracker::toVObjs(%objArr, %vobjArr) {
 	assert(%objArr != %vobjArr, "%objArr and %vobjArr must not be the same array");
-	for (%obj = aitfirst(%objArr); !aitdone(%objArr); %obj = aitnext(%objArr)) {
-		if ((%v = ObjTracker::add(%obj)) == "") continue;
-		apush(%obj @ " " @ %v, %vobjArr);
+	adel(%vobjArr);
+	for (%obj = aitfirst(%objArr); !aitdone(%objArr); %obj = aitnext(%objArr))
+		if ((%v = ObjTracker::add(%obj)) != "")
+			apush(%obj @ " " @ %v, %vobjArr);
+}
+
+// ObjTracker::fromVObjs creates an object ID array from a "versioned object" array,
+// skipping any invalidated objects.
+// It only consiers first two words of each version object; any extra data is ignored.
+function ObjTracker::fromVObjs(%vobjArr, %objArr) {
+	assert(%objArr != %vobjArr, "%objArr and %vobjArr must not be the same array");
+	adel(%objArr);
+	for (%vobj = aitfirst(%vobjArr); !aitdone(%vobjArr); %vobj = aitnext(%vobjArr)) {
+		if ((%obj = ObjTracker::fromVObj(%vobj)) != "")
+			apush(%obj, %objArr);
 	}
 }
 
-// ObjTracker::filterVObjArray updates a "versioned object" array, removing any objects that have
-// been deleted since it was created.
-// It only looks at the first two words of each version object; any extra data after these words
-// is preserved (for elements not pruned).
-function ObjTracker::filterVObjArray(%vobjArr) {
-	%updated = false;
+// ObjTracker::pruneVObjs updates a "versioned object" array, removing invalidated objects.
+// It only consiers first two words of each version object; any extra data is preserved.
+function ObjTracker::pruneVObjs(%vobjArr) {
 	for (%vobj = aitfirst(%vobjArr); !aitdone(%vobjArr); %vobj = aitnext(%vobjArr)) {
-		%obj = getWord(%vobj, 0);
-		%v = getWord(%vobj, 1);
-		if (ObjTracker::check(%obj) != %v) {
+		if (ObjTracker::fromVObj(%vobj) == "") {
 			aclr(ait(%vobjArr), %vobjArr);
 			%updated = true;
 		}
