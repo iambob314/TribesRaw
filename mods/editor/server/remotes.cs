@@ -24,6 +24,16 @@ function Editor::sendRegGroup(%clientId, %group) {
 function remoteEditor::setControlMode(%clientId, %mode) { REditor::setMode(%clientId, %mode); }
 function remoteEditor::setDropMode(%clientId, %mode) { REditor::setDropMode(%clientId, %mode); }
 
+function remoteEditor::deleteSelection(%clientId) { REditor::deleteSelection(%clientId); }
+function remoteEditor::cutSelection(%clientId)    { REditor::cutSelection(%clientId); }
+function remoteEditor::copySelection(%clientId)   { REditor::copySelection(%clientId); }
+function remoteEditor::pasteSelection(%clientId)  { REditor::pasteSelection(%clientId); }
+function remoteEditor::dupSelection(%clientId)    { REditor::dupSelection(%clientId); }
+function remoteEditor::dropSelection(%clientId)   { REditor::dropSelection(%clientId); }
+
+function remoteEditor::undo(%clientId)   { REditor::undo(%clientId); }
+function remoteEditor::redo(%clientId)   { REditor::redo(%clientId); }
+
 // Effect of hit/miss on selection set by %mode:
 // ""  -> set/clear
 // add -> add/nothing
@@ -39,17 +49,17 @@ function remoteEditor::castSelect(%clientId, %mode) {
 	
 	if (%mode == add) {
 		if (%hit) {
-			REditor::sel::add(%clientId, %obj);
+			REditor::sel::add(%clientId, afromval(%obj));
 			REditor::msg(%clientId, "sel add " @ %objName);
 		}
 	} else if (%mode == rem) {
 		if (%hit) {
-			REditor::sel::remove(%clientId, %obj);
+			REditor::sel::remove(%clientId, afromval(%obj));
 			REditor::msg(%clientId, "sel remove " @ %objName);
 		}
 	} else {
 		if (%hit) {
-			REditor::sel::set(%clientId, %obj);
+			REditor::sel::set(%clientId, afromval(%obj));
 			REditor::msg(%clientId, "sel set " @ %objName);
 		} else {
 			REditor::sel::clear(%clientId);
@@ -66,7 +76,9 @@ function remoteEditor::createObject(%clientId, %group, %name) {
 	if (!isObject(%x)) { REditor::msgError(%clientId, "error creating object"); return; }
 
 	addToSet(MissionGroup, %x);
+
+	echos("wow", %x, %arglist);
 	
-	REditor::sel::set(%clientId, %x);
+	REditor::sel::set(%clientId, afromval(%x));
 	REditor::dropSelection(%clientId);
 }

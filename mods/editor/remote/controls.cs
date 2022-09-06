@@ -21,6 +21,15 @@ bindCommand(keyboard, make, f9, to, "EditorUI::toggleHelp();");
 bindCommand(keyboard, make, "?", to, "EditorUI::toggleHelp();");
 bindCommand(keyboard, make, o, to, "EditorUI::toggleOptions();");
 
+bindCommand(keyboard, make, control, delete, to, "Editor::deleteSelection();");
+bindCommand(keyboard, make, control, c, to, "Editor::copySelection();");
+bindCommand(keyboard, make, control, x, to, "Editor::cutSelection();");
+bindCommand(keyboard, make, control, v, to, "Editor::pasteSelection();");
+bindCommand(keyboard, make, control, d, to, "Editor::dupSelection();");
+bindCommand(keyboard, make, control, g, to, "Editor::dropSelection();");
+
+bindCommand(keyboard, make, control, z, to, "Editor::undo();");
+bindCommand(keyboard, make, control, y, to, "Editor::redo();");
 
 bindCommand(mouse, make, button0, TO, "Mouse::down();");
 bindCommand(mouse, break, button0, TO, "Mouse::up();");

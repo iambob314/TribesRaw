@@ -33,6 +33,7 @@ bindCommand(keyboard, make, control, n, to, "Editor::createGroup();");
 
 //
 bindCommand(keyboard, make, control, z, to, "Editor::undo();");
+bindCommand(keyboard, make, control, y, to, "Editor::redo();");
 bindCommand(keyboard, make, control, s, to, "Editor::save();");
 
 // 
