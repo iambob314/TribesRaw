@@ -50,7 +50,7 @@ function REditor::setOptions(%c, %snaps, %rsnap, %constrs, %dropMode, %plane) {
 //
 
 function REditor::copyDelSel(%c, %copy, %del) {
-	%objArr = REditor::sel::arr(%c);
+	%objArr = REditor::sel::arr(%c, atmp());
 	if (%copy) REditor::saveObjects(%c, "clipbuffer", false, %objArr);
 	if (%del)  REditor::astack::doAndPush(%c, REditor::action::delete::make(%c, %objArr));
 }
@@ -67,7 +67,7 @@ function REditor::undo(%c)            { REditor::astack::popAndDo(%c, $REditor::
 function REditor::redo(%c)            { REditor::astack::popAndDo(%c, $REditor::redo); }
 
 function REditor::dropSelection(%c) {
-	%objArr = REditor::sel::arr(%c);
+	%objArr = REditor::sel::arr(%c, atmp());
 	if (alen(%objArr) != 1) {
 		if (%l > 1) REditor::msgErr(%c, "cannot drop multiple objects");
 		return;

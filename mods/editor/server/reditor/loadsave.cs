@@ -19,7 +19,6 @@ function REditor::deleteObjectFile(%c, %filebase) {
 function REditor::saveObjects(%c, %filebase, %append, %objArr) {
 	%filename = "temp\\" @ %filebase @ "." @ %c @ ".cs";
 	
-	
 	for (%obj = aitfirst(%objArr); !aitdone(%objArr); %obj = aitnext(%objArr)) {
 		%oldLevel = $Console::printLevel;
 		$Console::printLevel = 0; // silence logging due to "return string: 0" spam

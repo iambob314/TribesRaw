@@ -36,7 +36,7 @@ function REditor::action::paste::make(%c, %filebase, %keepFile) {
 
 function REditor::action::paste::do(%c, %args) {
 	%filebase = getWord(%args, 0);
-	%objArr = REditor::loadObjects(%c, %filebase);
+	%objArr = REditor::loadObjects(%c, %filebase, atmp());
 	
 	REditor::sel::set(%c, %objArr); // select newly-pasted objects
 
@@ -62,8 +62,8 @@ function REditor::action::create::do(%c, %arglist) {
 	if (!isObject(%x)) { REditor::msgErr(%c, "error creating object"); return; }
 
 	addToSet(REditor::sandboxGroup(%c), %x);
-	%objArr = afromval(%x);
-	
+	%objArr = afromval(%x, atmp());
+
 	REditor::sel::set(%c, %objArr);
 
 	if ((%pos = REditor::getDropPos(%c)) != "") GameBase::setPosition(%x, %pos);

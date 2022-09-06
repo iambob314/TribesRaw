@@ -77,7 +77,7 @@ function remoteEditor::castSelect(%clientId, %mode) {
 		}
 	} else {
 		if (%hit) {
-			REditor::sel::set(%clientId, afromval(%obj));
+			REditor::sel::set(%clientId, afromval(%obj, atmp()));
 			REditor::msg(%clientId, "sel set " @ %objName);
 		} else {
 			adel(REditor::sel(%clientId));

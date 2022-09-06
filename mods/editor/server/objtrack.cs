@@ -57,7 +57,7 @@ function ObjTracker::toVObjs(%objArr, %vobjArr) {
 	for (%obj = aitfirst(%objArr); !aitdone(%objArr); %obj = aitnext(%objArr))
 		if ((%v = ObjTracker::add(%obj)) != "")
 			apush(%obj @ " " @ %v, %vobjArr);
-	return %objArr;
+	return %vobjArr;
 }
 
 // ObjTracker::fromVObjs creates an object ID array from a "versioned object" array,

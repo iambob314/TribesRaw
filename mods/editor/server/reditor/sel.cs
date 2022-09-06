@@ -8,8 +8,7 @@ function REditor::sel(%c) {
 }
 
 function REditor::sel::arr(%c, %outArr) {
-	ObjTracker::fromVObjs(REditor::sel(%c), %outArr); // also prunes
-	return %outArr;
+	return ObjTracker::fromVObjs(REditor::sel(%c), %outArr); // also prunes
 }
 
 function REditor::sel::prune(%c) {
