@@ -3,7 +3,7 @@
 //
 
 //
-// Remote registry stuff
+// Remote registry/options stuff
 //
 
 function remoteEditor::downloadRegistry(%clientId) {
@@ -17,14 +17,26 @@ function Editor::sendRegGroup(%clientId, %group) {
 	ado(remoteEval, %namesArr, %clientId, Editor::addRegistryEntry, %group);
 }
 
+function remoteEditor::setOptions(%clientId, %snaps, %rsnap, %constrs, %dropMode, %plane) {
+	REditor::setOptions(%clientId, %snaps, %rsnap, %constrs, %dropMode, %plane);
+}
+
+// Editor::getTerrainGrid reports the latest terrain grid size to remote editor via
+// remoteEditor::updateTerrainGrid
+function remoteEditor::getTerrainGrid(%clientId) {
+	%x = $ME::XGridSnap; %y = $ME::YGridSnap; // save old snaps
+	ME::onUseTerrainGrid(); // Makes ME load grid spacing into $ME::{X,Y}GridSnap
+
+	remoteEval(%clientId, Editor::updateTerrainGrid, $ME::XGridSnap, $ME::YGridSnap);
+	
+	$ME::XGridSnap = %x; $ME::YGridSnap = %y; // restore old snaps
+}
+
 //
 // Remote editor control stuff
 //
 
 function remoteEditor::setMode(%clientId, %mode) { REditor::setMode(%clientId, %mode); }
-function remoteEditor::setOptions(%clientId, %dropMode) {
-	REditor::setOptions(%clientId, %dropMode);
-}
 
 function remoteEditor::deleteSelection(%clientId) { REditor::deleteSelection(%clientId); }
 function remoteEditor::cutSelection(%clientId)    { REditor::cutSelection(%clientId); }

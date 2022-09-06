@@ -4,8 +4,11 @@
 // We do a bit of loopback vs. remote editor logic here for simplicity. Could factor it out
 // in the future.
 //
+// Some functions may be overridden by loopback/remote editor GUI code (commented below).
+//
 
-// TODO: make these more generic by delegating Control names to e.g. EditorUI::<mode>::optionsModal
+// TODO: make these more generic and loopback/remote-specific by delegating to
+//       e.g. EditorUI::<mode>::optionsModal();
 
 function EditorUI::getModal() {
 	if (Control::getVisible(OptionsCtrl))         return OptionsCtrl;
@@ -55,8 +58,6 @@ function OptionsCtrl::onShow() {
 	Control::setActive(YGridSnapCtrl, $ME::SnapToGrid);
 	Control::setActive(ZGridSnapCtrl, $ME::SnapToGrid);
 	Control::setActive(UseTerrainGrid, $ME::SnapToGrid);
-	
-	if (!$Editor::isLoopback) Control::setVisible(UseTerrainGrid, false); // not valid for remote
 }
 function OptionsCtrl::onHide() {
 	if ($Editor::isLoopback) ME::GetConsoleOptions(); // update ME options only for loopback
@@ -75,11 +76,11 @@ function ME::SnapRotations() {
    Control::setActive(RotationSnapCtrl, $ME::SnapRotations);
 }
 
+// NOTE: this gets overridden when remote editor is loaded
 function UseTerrainGrid::onAction() {
 	ME::onUseTerrainGrid(); // Makes ME load grid spacing into $ME::{X,Y}GridSnap
 	Control::setValue(XGridSnapCtrl, $ME::XGridSnap);
 	Control::setValue(YGridSnapCtrl, $ME::YGridSnap);
-	Control::setValue(ZGridSnapCtrl, $ME::ZGridSnap);
 }
 
 // TED Options (TedOptionsCtrl)

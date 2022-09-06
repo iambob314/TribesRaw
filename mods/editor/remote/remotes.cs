@@ -3,7 +3,7 @@
 //
 
 //
-// Remote registry stuff
+// Remote registry/options stuff
 //
 
 // Editor::downloadRegistry downloads the editor object registry from the server.
@@ -17,15 +17,30 @@ function remoteEditor::addRegistryEntry(%serverId, %group, %name) {
 }
 function remoteEditor::downloadComplete(%serverId) { echo("editor registry downloaded"); }
 
+// Editor::setOptions update's server's ME vars for this remote editor
+function Editor::setOptions(%m) {
+	// TODO: $ME::Rotate{X,Y,Z}Axis not passed because I have no idea what they actually do...
+	%snaps = Editor::getGridSnaps();
+	%rsnap = Editor::getRotationSnap();
+	%constrs = Editor::getConstraints();
+	%dropMode = Editor::getDropMode();
+	%plane = $ME::UsePlaneMovement;
+	remoteEval(2048, Editor::setOptions, %snaps, %rsnap, %constrs, %dropMode, %plane);
+}
+
+// Editor::useTerrainGrid requests the server send latest terrain grid spacing,
+// and when it comes back on remoteEditor::setTerrainGrid, updates ME vars/OptionsCtrl
+function Editor::useTerrainGrid() { remoteEval(2048, Editor::getTerrainGrid); }
+function remoteEditor::updateTerrainGrid(%serverId, %x, %y) {
+	Control::setValue(XGridSnapCtrl, $ME::XGridSnap = %x);
+	Control::setValue(YGridSnapCtrl, $ME::YGridSnap = %y);
+}
+
 //
 // Remote editor control stuff
 //
 
 function Editor::setMode(%m)    { remoteEval(2048, Editor::setMode, %m); }
-function Editor::setOptions(%m) {
-	%dropMode = Editor::getDropMode();
-	remoteEval(2048, Editor::setOptions, %dropMode);
-}
 
 // Editor::castSelect does a remote editor raycast selection
 function Editor::castSelect(%m) { remoteEval(2048, Editor::castSelect, %m); }
@@ -50,12 +65,3 @@ function Editor::redo()   { remoteEval(2048, Editor::redo); }
 //
 // Utilities
 //
-
-function Editor::getDropMode() {
-	if ($ME::DropAtCamera) return Cam;
-	if ($ME::DropWithRotAtCamera) return CamWithRot;
-	if ($ME::DropBelowCamera) return BelowCam;
-	if ($ME::DropToScreenCenter) return ScreenCenter;
-	if ($ME::DropToSelectedObject) return SelectedObject;
-	return "";
-}

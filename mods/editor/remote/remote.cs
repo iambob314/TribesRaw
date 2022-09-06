@@ -1,5 +1,6 @@
 exec("editor\\remote\\gui\\gui.cs");
 
+exec("editor\\remote\\options.cs");
 exec("editor\\remote\\remotes.cs");
 
 exec("editor\\remote\\clickdrag.cs");

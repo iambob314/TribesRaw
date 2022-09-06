@@ -31,14 +31,18 @@ function REditor::setMode(%c, %mode) {
 	if (%obj != "") Client::setControlObject(%c, %obj);
 }
 
-function REditor::setOptions(%c, %dropMode) {
+function REditor::setOptions(%c, %snaps, %rsnap, %constrs, %dropMode, %plane) {
 	if (%dropMode != Cam          && %dropMode != CamWithRot &&
 	    %dropMode != BelowCam     && %dropMode != ScreenCenter &&
 		%dropMode != SelectedObject) {
 		REditor::msgErr(%c, "bad drop mode " @ %dropMode); return;
 	}
 
+	%c.gridSnaps = %snaps;
+	%c.rotSnap = %rsnap;
+	%c.constraints = %constrs;
 	%c.dropMode = %dropMode;
+	%c.planeMovement = %plane;
 }
 
 //

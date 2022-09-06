@@ -16,3 +16,8 @@ function EditorUI::refreshControls() {
 // 	if ($ME::InspectObject != "")
 // 		MissionObjectList::Inspect($ME::InspectWorld, $ME::InspectObject);
 // }
+
+// NOTE: overrides action in editor/gui/modal.cs since we need to do a remote loop here
+function UseTerrainGrid::onAction() {
+	Editor::useTerrainGrid();
+}
