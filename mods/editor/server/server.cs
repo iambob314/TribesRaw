@@ -6,11 +6,11 @@
 // or "focusServer" jumps by loopback client.
 //
 
-exec("editor\\server\\newmission.cs");
-
+exec("editor\\server\\objtrack.cs");
 exec("editor\\server\\remotes.cs");
-
 exec("editor\\server\\reditor\\reditor.cs");
+
+exec("editor\\server\\newmission.cs");
 
 function Editor::initServer(%port) {
 	// Create serverDelegate (server socket, etc.)

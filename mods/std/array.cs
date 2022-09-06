@@ -6,6 +6,7 @@
 //
 // Arrays are accessed via the functions below. These parameter names are standard:
 // * %a:     the array name; always last and optional (defaults to "default" array)
+// * %b:     another array
 // * %i, %j: an array index
 // * %v:     a value
 //
@@ -32,8 +33,11 @@
 // * aitdone()          : is iteration done?
 // * ait()              : iteration next index
 // * ado(%f,%a,...)     : iterate %a, call %f with ... args followed by the element
+//                        (NOTE: %a arg precedes ... args, not last as usual)
 // * ado2(%f,%k,%a,...) : iterate %a, call %f with ... args but replace %k'th arg with the element
-//                        (NB: %a arg precedes ... args, not last as usual)
+//                        (NOTE: %a arg precedes ... args, not last as usual)
+//
+// * aeq(%b) : check if equal to array %b
 //
 // Destructors (args as above):
 // * adel()      : delete array (release all memory)
@@ -169,6 +173,14 @@ function ado2(%f, %k, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
 	}
 }
 
+function aeq(%b, %a) {
+	if ((%l = alen(%a)) != alen(%b)) return false;
+	for (%i = 0; %i < %l; %i++)
+		if (aget(%i, %a) != aget(%i, %b)) return false;
+	return true;
+}
+
+
 
 // adel deletes an entire array
 function adel(%a) {
@@ -226,13 +238,6 @@ function asubsort(%i, %j, %a) {
 	// Recursively sort left and right of the pivot
 	asubsort(%i, %pi, %a);
 	asubsort(%pi+1, %j, %a);
-}
-
-// aidx coerces %i to a valid index (integer-ifying), returning "" if not valid for the array (out of bounds)
-// (this is primarily a helper function for this file)
-function aidx(%i, %a) {
-	%i |= 0; // integer-ify
-	return tern(%i >= 0 && %i < alen(%a), %i, "");
 }
 
 
@@ -318,3 +323,13 @@ function atoset(%set, %a) {
 		addToSet(%set, %obj);
 }
 
+//
+// Internal helpers
+//
+
+// aidx coerces %i to a valid index (integer-ifying), returning "" if out of bounds
+// (this is primarily a helper function for this file)
+function aidx(%i, %a) {
+	%i |= 0; // integer-ify
+	return tern(%i >= 0 && %i < alen(%a), %i, "");
+}
