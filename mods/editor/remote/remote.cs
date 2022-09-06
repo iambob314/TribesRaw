@@ -14,6 +14,7 @@ IDBMP_RETICLE2 = 00160924, "LR_H_Reticle.bmp";
 
 function Editor::onConnect() {
 	Editor::defaultMEOptions();
+	Editor::defaultRemoteEditorOptions();
 	Editor::downloadRegistry();
 }
 

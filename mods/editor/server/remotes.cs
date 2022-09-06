@@ -48,6 +48,8 @@ function remoteEditor::dropSelection(%clientId)   { REditor::dropSelection(%clie
 function remoteEditor::undo(%clientId)   { REditor::undo(%clientId); }
 function remoteEditor::redo(%clientId)   { REditor::redo(%clientId); }
 
+function remoteEditor::nudge(%clientId, %dpos, %drot) { REditor::nudge(%clientId, %dpos, %drot); }
+
 function remoteEditor::createObject(%clientId, %group, %name) {
 	REditor::createObject(%clientId, %group, %name);
 }

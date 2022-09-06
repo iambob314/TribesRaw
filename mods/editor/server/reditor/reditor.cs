@@ -78,6 +78,11 @@ function REditor::dropSelection(%c) {
 	if ((%rot = REditor::getDropRot(%c)) != "") GameBase::setRotation(%obj, %rot);
 }
 
+function REditor::nudge(%c, %dpos, %drot) {
+	%objArr = REditor::sel::arr(%c, atmp());
+	REditor::astack::doAndPush(%c, REditor::action::move::make(%c, %objArr, %dpos, %drot));
+}
+
 function REditor::createObject(%c, %group, %name) {
 	%arglist = EditorRegistry::getArglist(%group, %name);
 	if (%arglist == "") { REditor::msgErr(%c, "bad object " @ %group @ "/" @ %name); return; }

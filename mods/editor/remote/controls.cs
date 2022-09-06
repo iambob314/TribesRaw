@@ -31,6 +31,30 @@ bindCommand(keyboard, make, control, g, to, "Editor::dropSelection();");
 bindCommand(keyboard, make, control, z, to, "Editor::undo();");
 bindCommand(keyboard, make, control, y, to, "Editor::redo();");
 
+bindCommand(keyboard, make,          up,    to, "Editor::nudge(0, 1, 0);");
+bindCommand(keyboard, make,          down,  to, "Editor::nudge(0, -1, 0);");
+bindCommand(keyboard, make,          right, to, "Editor::nudge(1, 0, 0);");
+bindCommand(keyboard, make,          left,  to, "Editor::nudge(-1, 0, 0);");
+bindCommand(keyboard, make, control, up,    to, "Editor::nudge(0, 0, 1);");
+bindCommand(keyboard, make, control, down,  to, "Editor::nudge(0, 0, -1);");
+
+bindCommand(keyboard, make, shift,          up,    to, "Editor::nudge(0, 1, 0, true);");
+bindCommand(keyboard, make, shift,          down,  to, "Editor::nudge(0, -1, 0, true);");
+bindCommand(keyboard, make, shift,          right, to, "Editor::nudge(1, 0, 0, true);");
+bindCommand(keyboard, make, shift,          left,  to, "Editor::nudge(-1, 0, 0, true);");
+bindCommand(keyboard, make, shift, control, up,    to, "Editor::nudge(0, 0, 1, true);");
+bindCommand(keyboard, make, shift, control, down,  to, "Editor::nudge(0, 0, -1, true);");
+
+bindCommand(keyboard, make, alt, up,    to, "Editor::nudgeRot(1, 0, 0);");
+bindCommand(keyboard, make, alt, down,  to, "Editor::nudgeRot(-1, 0, 0);");
+bindCommand(keyboard, make, alt, right, to, "Editor::nudgeRot(0, 0, 1);");
+bindCommand(keyboard, make, alt, left,  to, "Editor::nudgeRot(0, 0, -1);");
+
+bindCommand(keyboard, make, shift, alt, up,    to, "Editor::nudgeRot(1, 0, 0, true);");
+bindCommand(keyboard, make, shift, alt, down,  to, "Editor::nudgeRot(-1, 0, 0, true);");
+bindCommand(keyboard, make, shift, alt, right, to, "Editor::nudgeRot(0, 0, 1, true);");
+bindCommand(keyboard, make, shift, alt, left,  to, "Editor::nudgeRot(0, 0, -1, true);");
+
 bindCommand(mouse, make, button0, TO, "Mouse::down();");
 bindCommand(mouse, break, button0, TO, "Mouse::up();");
 

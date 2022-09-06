@@ -74,3 +74,58 @@ function REditor::action::create::do(%c, %arglist) {
 }
 
 function REditor::action::create::cleanup(%c, %arglist) {}
+
+//
+// Move object action
+//
+function REditor::action::move::make(%c, %objArr, %dpos, %drot) {
+	%moveArr = anew();
+	for (%obj = aitfirst(%objArr); !aitdone(%objArr); %obj = aitnext(%objArr)) {
+		%pos = GameBase::getPosition(%obj);
+		%rot = GameBase::getRotation(%obj);
+		%newPos = tern(%dpos != "", Vector::add(%pos, %dpos), "X X X");
+		%newRot = tern(%drot != "", Vector::add(%rot, %drot), "X X X");
+		
+		%move = ObjTracker::toVObj(%obj) @ " " @ %newPos @ " " @ %newRot;
+		apush(%move, %moveArr);
+	}
+	
+	return "move " @ %moveArr;
+}
+
+function REditor::action::move::do(%c, %moveArr, %prevAction) {
+	%makeInv = (getWord(%prevAction, 0) != "move"); // don't compute inverse if prev action is move
+	
+	if (%makeInv) %invMoveArr = anew();
+	for (%move = aitfirst(%moveArr); !aitdone(%moveArr); %move = aitnext(%moveArr)) {
+		echos("WOW", %move);
+		if ((%obj = ObjTracker::fromVObj(%move)) == "") continue;
+
+		%newPos = getWord(%move, 2) @ " " @ getWord(%move, 3) @ " " @ getWord(%move, 4);
+		%newRot = getWord(%move, 5) @ " " @ getWord(%move, 6) @ " " @ getWord(%move, 7);
+		
+		if (%newPos != "X X X") {
+			%pos = GameBase::getPosition(%obj);
+			GameBase::setPosition(%obj, %newPos);
+		} else {
+			%pos = "X X X";
+		}
+		if (%newRot != "X X X") {
+			%rot = GameBase::getRotation(%obj);
+			GameBase::setRotation(%obj, %newRot);
+		} else {
+			%rot = "X X X";
+		}
+		
+		if (%makeInv) {
+			%invMove = ObjTracker::toVObj(%obj) @ " " @ %pos @ " " @ %rot;
+			apush(%invMove, %invMoveArr);
+		}
+	}
+
+	REditor::action::move::cleanup(%c, %moveArr);
+	if (%makeInv) return "move " @ %invMoveArr;
+	else          return "";
+}
+
+function REditor::action::move::cleanup(%c, %moveArr) { adel(%moveArr); }

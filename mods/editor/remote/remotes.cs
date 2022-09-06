@@ -62,6 +62,21 @@ function Editor::dropSelection()   { remoteEval(2048, Editor::dropSelection); }
 function Editor::undo()   { remoteEval(2048, Editor::undo); }
 function Editor::redo()   { remoteEval(2048, Editor::redo); }
 
+function Editor::nudge(%x, %y, %z, %big) {
+	%scale = $Editor::nudge;
+	if (%big) %scale *= 8;
+
+	%v = Vector::scale(%x @ " " @ %y @ " " @ %z, %scale);
+	remoteEval(2048, Editor::nudge, %v, "");
+}
+function Editor::nudgeRot(%x, %y, %z, %big) {
+	%scale = deg2rad($Editor::nudgeRot);
+	if (%big) %scale *= 8;
+	
+	%v = Vector::scale(%x @ " " @ %y @ " " @ %z, %scale);
+	remoteEval(2048, Editor::nudge, "", %v);
+}
+
 //
 // Utilities
 //

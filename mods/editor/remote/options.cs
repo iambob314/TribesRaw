@@ -1,3 +1,7 @@
+function Editor::defaultRemoteEditorOptions() {
+	$Editor::nudge = 0.25;
+	$Editor::nudgeRot = 90/8;
+}
 
 function Editor::getDropMode() {
 	if ($ME::DropAtCamera) return Cam;

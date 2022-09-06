@@ -4,8 +4,14 @@
 // An "action" is a string "actionName [args]", with actionName a valid identifier
 // (args is the rest of the string; it may be multiple words or may be omitted entirely).
 //
-// Each action "actionName" defines these functions (%c = client ID, %args = as above):
-// * REditor::action::actionName::do(%c, %args)      : execute, cleanup, return inverse action
+// Each action "actionName" defines two functions (%c = client ID, %args = as above):
+// * REditor::action::actionName::do(%c, %args, %prevAction):
+//
+//   Execute and cleanup action, then return inverse action, to be pushed on the undo/redo stack.
+//   Return "" to indicate no undo/redo to push. The previous top-of-stack is passed as
+//   %prevAction (or "" if stack empty); it may be used to decide whether to return "" (e.g.
+//   to coalesce with previous undo/redo.
+//
 // * REditor::action::actionName::cleanup(%c, %args) : cleanup action without executing
 //
 // It's also idiomatic to have:
@@ -25,15 +31,21 @@ function REditor::astack(%c, %which) {
 function REditor::astack::doAndPush(%c, %action) {
 	REditor::astack::clear(%c, $REditor::redo);
 	
-	%inv = REditor::action::invokeFunc(do, %c, %action);
-	if (%inv != "") apush(%inv, REditor::astack(%c, $REditor::undo));
+	%undoStack = REditor::astack(%c, $REditor::undo);
+	%prev = alast(%undoStack);
+	
+	%inv = REditor::action::invokeFunc(do, %c, %action, %prev);
+	if (%inv != "") apush(%inv, %undoStack);
 }
 
 function REditor::astack::popAndDo(%c, %which) {
 	if ((%action = apop(REditor::astack(%c, %which))) == "") return;
 
-	%inv = REditor::action::invokeFunc(do, %c, %action);
-	if (%inv != "") apush(%inv, REditor::astack(%c, 1 - %which));
+	%otherStack = REditor::astack(%c, 1 - %which);
+	%prev = alast(%otherStack);
+
+	%inv = REditor::action::invokeFunc(do, %c, %action, %prev);
+	if (%inv != "") apush(%inv, %otherStack);
 }
 
 function REditor::astack::clear(%c, %which) {
@@ -48,7 +60,7 @@ function REditor::astack::print(%c, %which) {
 }
 
 // REditor::action::invokeFunc invokes delegate %funcBase (do, cleanup) for %action.
-function REditor::action::invokeFunc(%funcBase, %c, %action) {
+function REditor::action::invokeFunc(%funcBase, %c, %action, %prevAction) {
 	%func = "REditor::action::" @ String::prefix(%action, " ") @ "::" @ %funcBase;
-	return invoke(%func, %c, String::suffix(%action, " "));
+	return invoke(%func, %c, String::suffix(%action, " "), %prevAction);
 }
