@@ -2,6 +2,8 @@
 
 function Editor::initMESettings() {
 	// TODO: init other "special" $ME vars and call ME::GetConsoleOptions()
+
+	Editor::defaultMEOptions();	// load common ME options
 	
 	// Set up ME modes/variables
 	ME::SetGrabMask(~($ObjectType::Terrain | $ObjectType::Container | $ObjectType::Default));
@@ -12,21 +14,7 @@ function Editor::initMESettings() {
 	
 	$ME::ShowEditObjects = true;
 	$ME::ShowGrabHandles = true;
-	
-	$ME::SnapToGrid = true;
-	$ME::XGridSnap = $ME::YGridSnap = $ME::ZGridSnap = 0.125;
-	$ME::ConstrainX = $ME::ConstrainY = $ME::ConstrainZ = false;
-	$ME::SnapRotations = false;
-	$ME::RotationSnap = 90;
-	$ME::RotateXAxis = $ME::RotateYAxis = false;
-	$ME::RotateZAxis = true;
-	
-	$ME::DropAtCamera = $ME::DropWithRotAtCamera = false;
-	$ME::DropBelowCamera = $ME::DropToSelectedObject = false;
-	$ME::DropToScreenCenter = true;
-	
-	$ME::UsePlaneMovement = true;
-	
+
 	ME::GetConsoleOptions(); // load vars into ME internals
 }
 

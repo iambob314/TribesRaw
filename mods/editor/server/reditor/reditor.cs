@@ -35,13 +35,14 @@ function REditor::setMode(%c, %mode) {
 	if (%obj != "") Client::setControlObject(%c, %obj);
 }
 
-$REditor::dropModes[Cam] = true;
-$REditor::dropModes[CamWithRot] = true;
-$REditor::dropModes[BelowCam] = true;
-$REditor::dropModes[ScreenCenter] = true;
-$REditor::dropModes[SelectedObject] = true;
-function REditor::setDropMode(%c, %mode) {
-	if ($REditor::dropModes[%mode])	%c.dropMode = %mode;
+function REditor::setOptions(%c, %dropMode) {
+	if (%dropMode != Cam          && %dropMode != CamWithRot &&
+	    %dropMode != BelowCam     && %dropMode != ScreenCenter &&
+		%dropMode != SelectedObject) {
+		REditor::msgErr(%c, "bad drop mode " @ %dropMode); return;
+	}
+
+	%c.dropMode = %dropMode;
 }
 
 //
@@ -122,7 +123,7 @@ function REditor::getDropPos(%c) {
 }
 
 function REditor::getDropRot(%c) {
-	%dm = def(%c.dropMode, ScreenCenter);
+	%dm = def(%c.dropMode, ScreenCenter);	
 	if (%dm == ScreenCenter) {
 		return "";
 	} else {

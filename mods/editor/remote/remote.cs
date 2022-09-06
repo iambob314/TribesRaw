@@ -12,6 +12,7 @@ IDBMP_RETICLE2 = 00160924, "LR_H_Reticle.bmp";
 // Defining hooks for main editor code
 
 function Editor::onConnect() {
+	Editor::defaultMEOptions();
 	Editor::downloadRegistry();
 }
 

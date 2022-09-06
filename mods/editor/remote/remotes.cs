@@ -24,7 +24,10 @@ function remoteEditor::downloadComplete(%serverId) { echo("editor registry downl
 //
 
 function Editor::setControlMode(%m) { remoteEval(2048, Editor::setControlMode, %m); }
-function Editor::setDropMode(%m)    { remoteEval(2048, Editor::setDropMode, %m); }
+function Editor::setOptions(%m) {
+	%dropMode = Editor::getDropMode();
+	remoteEval(2048, Editor::setOptions, %dropMode);
+}
 
 // Editor::castSelect does a remote editor raycast selection
 function Editor::castSelect(%m) { remoteEval(2048, Editor::castSelect, %m); }
@@ -46,3 +49,15 @@ function Editor::dropSelection()   { remoteEval(2048, Editor::dropSelection); }
 function Editor::undo()   { remoteEval(2048, Editor::undo); }
 function Editor::redo()   { remoteEval(2048, Editor::redo); }
 
+//
+// Utilities
+//
+
+function Editor::getDropMode() {
+	if ($ME::DropAtCamera) return Cam;
+	if ($ME::DropWithRotAtCamera) return CamWithRot;
+	if ($ME::DropBelowCamera) return BelowCam;
+	if ($ME::DropToScreenCenter) return ScreenCenter;
+	if ($ME::DropToSelectedObject) return SelectedObject;
+	return "";
+}

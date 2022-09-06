@@ -1,4 +1,9 @@
+//
 // Editor modals (ME options, TED options, help)
+//
+// We do a bit of loopback vs. remote editor logic here for simplicity. Could factor it out
+// in the future.
+//
 
 // TODO: make these more generic by delegating Control names to e.g. EditorUI::<mode>::optionsModal
 
@@ -19,6 +24,8 @@ function EditorUI::showModal(%newM) {
 	if (%newM != "") {
 		Control::setVisible(%newM, true);
 		invoke(%newM @ "::onShow");
+		
+		if (!$Editor::isLoopback) cursorOn(MainWindow); // enable cursor to avoid user need to Tab
 	}
 }
 
@@ -48,8 +55,12 @@ function OptionsCtrl::onShow() {
 	Control::setActive(YGridSnapCtrl, $ME::SnapToGrid);
 	Control::setActive(ZGridSnapCtrl, $ME::SnapToGrid);
 	Control::setActive(UseTerrainGrid, $ME::SnapToGrid);
+	
+	if (!$Editor::isLoopback) Control::setVisible(UseTerrainGrid, false); // not valid for remote
 }
-function OptionsCtrl::onHide() { ME::GetConsoleOptions(); }
+function OptionsCtrl::onHide() {
+	if ($Editor::isLoopback) ME::GetConsoleOptions(); // update ME options only for loopback
+}
 
 // GUI-wired callback from (un)checking "Snap to Grid"
 function ME::SnapToGrid() {

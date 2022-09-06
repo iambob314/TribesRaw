@@ -23,9 +23,9 @@ if ($Editor::isLoopback) {
 	exec("editor\\remote\\remote.cs");
 }
 
+exec("editor\\options.cs");
 exec("editor\\playercontrols.cs");
 exec("editor\\registry.cs");
-
 
 // TODO: this tail is experimental; clean up later
 

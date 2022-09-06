@@ -22,7 +22,9 @@ function Editor::sendRegGroup(%clientId, %group) {
 //
 
 function remoteEditor::setControlMode(%clientId, %mode) { REditor::setMode(%clientId, %mode); }
-function remoteEditor::setDropMode(%clientId, %mode) { REditor::setDropMode(%clientId, %mode); }
+function remoteEditor::setOptions(%clientId, %dropMode) {
+	REditor::setOptions(%clientId, %dropMode);
+}
 
 function remoteEditor::deleteSelection(%clientId) { REditor::deleteSelection(%clientId); }
 function remoteEditor::cutSelection(%clientId)    { REditor::cutSelection(%clientId); }
