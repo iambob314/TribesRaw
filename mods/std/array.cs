@@ -1,8 +1,14 @@
 //
 // How to use arrays:
 //
-// An array is global and is referenced by name. The "default" array is named ""; otherwise, valid array
-// names are valid variable names except underscore is prohibited.
+// An array is global and is referenced by name. The "default" array is named "";
+// otherwise, valid array names are valid variable names except underscore is prohibited.
+//
+// Be CAREFUL when using the default array. Remember that functions you call may clobber it, and
+// remember that since your caller may pass the default array as an argument, if it's clobbered,
+// it will mysteriously clobber one of your arguments!
+// Best practice: only use the default array in "top-level" functions, when you're *sure* no higher
+//                caller has used it. When in doubt, use atmp() instead.
 //
 // Arrays are accessed via the functions below. These parameter names are standard:
 // * %a:     the array name; always last and optional (defaults to "default" array)

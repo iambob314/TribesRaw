@@ -57,6 +57,7 @@ function ObjTracker::toVObjs(%objArr, %vobjArr) {
 	for (%obj = aitfirst(%objArr); !aitdone(%objArr); %obj = aitnext(%objArr))
 		if ((%v = ObjTracker::add(%obj)) != "")
 			apush(%obj @ " " @ %v, %vobjArr);
+	return %objArr;
 }
 
 // ObjTracker::fromVObjs creates an object ID array from a "versioned object" array,
@@ -65,10 +66,10 @@ function ObjTracker::toVObjs(%objArr, %vobjArr) {
 function ObjTracker::fromVObjs(%vobjArr, %objArr) {
 	assert(%objArr != %vobjArr, "%objArr and %vobjArr must not be the same array");
 	adel(%objArr);
-	for (%vobj = aitfirst(%vobjArr); !aitdone(%vobjArr); %vobj = aitnext(%vobjArr)) {
+	for (%vobj = aitfirst(%vobjArr); !aitdone(%vobjArr); %vobj = aitnext(%vobjArr))
 		if ((%obj = ObjTracker::fromVObj(%vobj)) != "")
 			apush(%obj, %objArr);
-	}
+	return %objArr;
 }
 
 // ObjTracker::pruneVObjs updates a "versioned object" array, removing invalidated objects.

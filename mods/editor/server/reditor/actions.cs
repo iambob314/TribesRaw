@@ -8,22 +8,24 @@
 
 // Note: does not take ownership of %objArr
 function REditor::action::delete::make(%c, %objArr) {
-	atoset(%set = newObject("", SimSet), %objArr);
-	return "delete " @ %set;
+	%vobjArr = ObjTracker::toVObjs(%objArr, anew());
+	return "delete " @ %vobjArr;
 }
 
-function REditor::action::delete::do(%c, %set) {
+function REditor::action::delete::do(%c, %vobjArr) {
+	%objArr = ObjTracker::fromVObjs(%vobjArr, atmp()); // drop any non-existent/recreated objects
+
 	// Save the objects for the inverse first, since we're about to delete them
 	%filebase = REditor::nextTmpFile(%c);
-	%objArr = REditor::saveObjects(%c, %filebase, false, afromset(%set));
+	REditor::saveObjects(%c, %filebase, false, %objArr);
 
 	ado(deleteObject, %objArr);
 
-	REditor::action::delete::cleanup(%c, %set);
+	REditor::action::delete::cleanup(%c, %vobjArr);
 	return REditor::action::paste::make(%c, %filebase);
 }
 
-function REditor::action::delete::cleanup(%c, %set) { deleteObject(%set); }
+function REditor::action::delete::cleanup(%c, %vobjArr) { adel(%vobjArr); }
 
 //
 // Paste action
@@ -60,14 +62,15 @@ function REditor::action::create::do(%c, %arglist) {
 	if (!isObject(%x)) { REditor::msgErr(%c, "error creating object"); return; }
 
 	addToSet(REditor::sandboxGroup(%c), %x);
-
-	REditor::sel::set(%c, afromval(%x));
+	%objArr = afromval(%x);
+	
+	REditor::sel::set(%c, %objArr);
 
 	if ((%pos = REditor::getDropPos(%c)) != "") GameBase::setPosition(%x, %pos);
 	if ((%rot = REditor::getDropRot(%c)) != "") GameBase::setRotation(%x, %rot);
 
 	REditor::action::create::cleanup(%c, %arglist);
-	return REditor::action::delete::make(%c, afromval(%x));
+	return REditor::action::delete::make(%c, %objArr);
 }
 
 function REditor::action::create::cleanup(%c, %arglist) {}
