@@ -1,6 +1,8 @@
-exec("editor\\remote\\remotes.cs");
 exec("editor\\remote\\gui\\gui.cs");
 
+exec("editor\\remote\\remotes.cs");
+
+exec("editor\\remote\\clickdrag.cs");
 exec("editor\\remote\\controls.cs");
 
 // Add some tags for reticle options in the observer-camera remote editor UI

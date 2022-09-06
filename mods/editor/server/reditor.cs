@@ -128,14 +128,12 @@ function REditor::LOS(%c, %includeTerrain) {
 	%obj = Client::getControlObject(%c);
 
 	if (REditor::getMode(%c) == Observer) {
-		echo(OBSERVER);
 		%pos = GameBase::getPosition(%obj);
 		%dir = Vector::getFromRot(GameBase::getRotation(%obj), 1000);
 		%pos2 = Vector::add(%pos, %dir);
 		
 		%hit = getLOSInfo(%pos, %pos2, %mask);
 	} else {
-		echo(PLAYER);
 		%hit = GameBase::getLOSInfo(%obj, 1000) &&
 			(%includeTerrain || getObjectType($los::object) != SimTerrain);
 	}

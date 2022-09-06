@@ -21,5 +21,9 @@ bindCommand(keyboard, make, f9, to, "EditorUI::toggleHelp();");
 bindCommand(keyboard, make, "?", to, "EditorUI::toggleHelp();");
 bindCommand(keyboard, make, o, to, "EditorUI::toggleOptions();");
 
-bindCommand(mouse, make, button0, TO, "Editor::castSelectMods();");
 
+bindCommand(mouse, make, button0, TO, "Mouse::down();");
+bindCommand(mouse, break, button0, TO, "Mouse::up();");
+
+function Mouse::onClick() { Editor::castSelectMods(); }
+function Mouse::onDrag(%start) {}
