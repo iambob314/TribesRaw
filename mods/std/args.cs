@@ -1,5 +1,5 @@
 
-afromvar("$argv", "", argv); // load $argv[...] into array argv
+afromvar(argv, "$argv"); // load $argv[...] into array argv
 
 // argvFlagParam takes a flag like "-myflag", finds its first occurrence in
 // $argv (command-line args), and returns the next token (its argument).
@@ -9,6 +9,6 @@ afromvar("$argv", "", argv); // load $argv[...] into array argv
 // argvFlagParam("-otherflag") == "baz"
 // argvFlagParam("foo")        == "bar" // works, but weird; don't use this except for flags
 function argvFlagParam(%flag) {
-	if ((%i = afind(%flag, argv)) == -1) return;
-	return aget(%i+1, argv);
+	if ((%i = afind(argv, %flag)) == -1) return;
+	return aget(argv, %i+1);
 }

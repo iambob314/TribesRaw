@@ -44,8 +44,8 @@ function REditor::loadObjects(%c, %filebase, %objArr) {
 
 	// Capture all new objects
 	for (%i = %start; (%obj = Group::getObject(0, %i)) != -1; %i++)
-		apush(%obj, %objArr);
+		apush(%objArr, %obj);
 
-	atoset(%sb, %objArr); // add all objects to %sb; also removes from set 0
+	atoset(%objArr, %sb); // add all objects to %sb; also removes from set 0
 	return %objArr;
 }

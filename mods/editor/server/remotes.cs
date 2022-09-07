@@ -8,13 +8,13 @@
 
 function remoteEditor::downloadRegistry(%clientId) {
 	%groupArr = EditorRegistry::groups();
-	ado(Editor::sendRegGroup, %groupArr, %clientId);
+	ado(%groupArr, Editor::sendRegGroup, %clientId);
 	remoteEval(%clientId, Editor::downloadComplete);
 }
 
 function Editor::sendRegGroup(%clientId, %group) {
 	%namesArr = EditorRegistry::groupNames(%group);
-	ado(remoteEval, %namesArr, %clientId, Editor::addRegistryEntry, %group);
+	ado(%namesArr, remoteEval, %clientId, Editor::addRegistryEntry, %group);
 }
 
 function remoteEditor::setOptions(%clientId, %snaps, %rsnap, %constrs, %dropMode, %plane) {
@@ -79,7 +79,7 @@ function remoteEditor::castSelect(%clientId, %mode) {
 		}
 	} else {
 		if (%hit) {
-			REditor::sel::set(%clientId, afromval(%obj, atmp()));
+			REditor::sel::set(%clientId, afromval(atmp(), %obj));
 			REditor::msg(%clientId, "sel set " @ %objName);
 		} else {
 			adel(REditor::sel(%clientId));

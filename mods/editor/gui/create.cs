@@ -10,13 +10,13 @@
 function EditorUI::refreshCreatorLists() {
 	TextList::clear(GroupList);
 	TextList::clear(NameList);
-	ado(TextList::addLine, EditorRegistry::groups(), GroupList); 
+	ado(EditorRegistry::groups(), TextList::addLine, GroupList); 
 }
 
 function GroupList::onAction() {
 	TextList::clear(NameList);
 	%group = Control::getValue(GroupList);
-	ado(TextList::addLine, EditorRegistry::groupNames(%group), NameList);
+	ado(EditorRegistry::groupNames(%group), TextList::addLine, NameList);
 }
 
 function NameList::onAction() {

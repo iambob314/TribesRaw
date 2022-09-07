@@ -72,7 +72,7 @@ function REditor::dropSelection(%c) {
 		if (%l > 1) REditor::msgErr(%c, "cannot drop multiple objects");
 		return;
 	}
-	%obj = aget(0, %objArr);
+	%obj = aget(%objArr, 0);
 
 	if ((%pos = REditor::getDropPos(%c)) != "") GameBase::setPosition(%obj, %pos);
 	if ((%rot = REditor::getDropRot(%c)) != "") GameBase::setRotation(%obj, %rot);

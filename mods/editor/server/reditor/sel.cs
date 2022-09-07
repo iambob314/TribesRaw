@@ -27,15 +27,15 @@ function REditor::sel::add(%c, %obj) {
 	%sel = REditor::sel(%c);
 	%vobj = ObjTracker::toVObj(%obj);
 	if ((%at = REditor::sel::find(%c, %obj)) != -1)
-		aset(%at, %vobj, %sel); // update version, in case it changed
+		aset(%sel, %at, %vobj); // update version, in case it changed
 	else
-		apush(%vobj, %sel);
+		apush(%sel, %vobj);
 }
 
 function REditor::sel::remove(%c, %obj) {
 	%sel = REditor::sel(%c);
 	if ((%at = REditor::sel::find(%c, %obj)) != -1)
-		asetpop(%at, %sel);
+		asetpop(%sel, %at);
 }
 
 function REditor::sel::set(%c, %objArr) {

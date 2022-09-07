@@ -35,7 +35,7 @@ function REditor::astack::doAndPush(%c, %action) {
 	%prev = alast(%undoStack);
 	
 	%inv = REditor::action::invokeFunc(do, %c, %action, %prev);
-	if (%inv != "") apush(%inv, %undoStack);
+	if (%inv != "") apush(%undoStack, %inv);
 }
 
 function REditor::astack::popAndDo(%c, %which) {
@@ -45,18 +45,18 @@ function REditor::astack::popAndDo(%c, %which) {
 	%prev = alast(%otherStack);
 
 	%inv = REditor::action::invokeFunc(do, %c, %action, %prev);
-	if (%inv != "") apush(%inv, %otherStack);
+	if (%inv != "") apush(%otherStack, %inv);
 }
 
 function REditor::astack::clear(%c, %which) {
 	%astack = REditor::astack(%c, %which);
-	ado(REditor::action::invokeFunc, cleanup, %c, %astack);
+	ado(%astack, REditor::action::invokeFunc, cleanup, %c);
 	adel(%astack);
 }
 
 function REditor::astack::print(%c, %which) {
 	%arr = REditor::astack(%c, %which);
-	ado(echo, %arr);
+	ado(%arr, echo);
 }
 
 // REditor::action::invokeFunc invokes delegate %funcBase (do, cleanup) for %action.

@@ -10,7 +10,7 @@ requireMod(gui);
 // * Editor::onConnect()   (called when connection complete)
 //
 
-$Editor::isLoopback = (afind("-server", argv) != -1); // -server command-line flag means we're server+loopback
+$Editor::isLoopback = (afind(argv, "-server") != -1); // -server command-line flag means we're server+loopback
 
 exec("editor\\connectseq.cs");
 exec("editor\\client.cs");

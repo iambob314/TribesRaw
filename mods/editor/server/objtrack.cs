@@ -62,7 +62,7 @@ function ObjTracker::toVObjs(%objArr, %vobjArr) {
 	adel(%vobjArr);
 	for (%obj = aitfirst(%objArr); !aitdone(%objArr); %obj = aitnext(%objArr))
 		if ((%v = ObjTracker::add(%obj)) != "")
-			apush(%obj @ " " @ %v, %vobjArr);
+			apush(%vobjArr, %obj @ " " @ %v);
 	return %vobjArr;
 }
 
@@ -74,7 +74,7 @@ function ObjTracker::fromVObjs(%vobjArr, %objArr) {
 	adel(%objArr);
 	for (%vobj = aitfirst(%vobjArr); !aitdone(%vobjArr); %vobj = aitnext(%vobjArr))
 		if ((%obj = ObjTracker::fromVObj(%vobj)) != "")
-			apush(%obj, %objArr);
+			apush(%objArr, %obj);
 	return %objArr;
 }
 
@@ -83,10 +83,10 @@ function ObjTracker::fromVObjs(%vobjArr, %objArr) {
 function ObjTracker::pruneVObjs(%vobjArr) {
 	%l = alen(%vobjArr);
 	for (%i = %nl = 0; %i < %l; %i++) {
-		%vobj = aget(%i, %vobjArr);
+		%vobj = aget(%vobjArr, %i);
 		if (ObjTracker::fromVObj(%vobj) == "") continue;
-		aset(%nl, %vobj, %vobjArr);
+		aset(%vobjArr, %nl, %vobj);
 	}
-	asetlen(%nl, %vobjArr);
+	asetlen(%vobjArr, %nl);
 	return %vobjArr;
 }

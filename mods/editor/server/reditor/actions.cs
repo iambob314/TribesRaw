@@ -19,7 +19,7 @@ function REditor::action::delete::do(%c, %vobjArr) {
 	%filebase = REditor::nextTmpFile(%c);
 	REditor::saveObjects(%c, %filebase, false, %objArr);
 
-	ado(deleteObject, %objArr);
+	ado(%objArr, deleteObject);
 
 	REditor::action::delete::cleanup(%c, %vobjArr);
 	return REditor::action::paste::make(%c, %filebase);
@@ -62,7 +62,7 @@ function REditor::action::create::do(%c, %arglist) {
 	if (!isObject(%x)) { REditor::msgErr(%c, "error creating object"); return; }
 
 	addToSet(REditor::sandboxGroup(%c), %x);
-	%objArr = afromval(%x, atmp());
+	%objArr = afromval(atmp(), %x);
 
 	REditor::sel::set(%c, %objArr);
 
@@ -87,7 +87,7 @@ function REditor::action::move::make(%c, %objArr, %dpos, %drot) {
 		%newRot = tern(%drot != "", Vector::add(%rot, %drot), "X X X");
 		
 		%move = ObjTracker::toVObj(%obj) @ " " @ %newPos @ " " @ %newRot;
-		apush(%move, %moveArr);
+		apush(%moveArr, %move);
 	}
 	
 	return "move " @ %moveArr;
@@ -119,7 +119,7 @@ function REditor::action::move::do(%c, %moveArr, %prevAction) {
 		
 		if (%makeInv) {
 			%invMove = ObjTracker::toVObj(%obj) @ " " @ %pos @ " " @ %rot;
-			apush(%invMove, %invMoveArr);
+			apush(%invMoveArr, %invMove);
 		}
 	}
 

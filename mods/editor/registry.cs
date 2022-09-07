@@ -12,12 +12,12 @@ function EditorRegistry::groupNames(%group)   { return EditorRegistry::gnames_ @
 function EditorRegistry::groupArglists(%group) { return EditorRegistry::gargs_ @ %group; }
 
 function EditorRegistry::addItem(%group, %name, %arglist) {
-	%groups = EditorRegistry::groups();
-	if (afind(%group, %groups) == -1)
-		apush(%group, %groups);
+	%groupsArr = EditorRegistry::groups();
+	if (afind(%groupsArr, %group) == -1)
+		apush(%groupsArr, %group);
 	
-	apush(%name, EditorRegistry::groupNames(%group));
-	apush(%arglist, EditorRegistry::groupArglists(%group));
+	apush(EditorRegistry::groupNames(%group), %name);
+	apush(EditorRegistry::groupArglists(%group), %arglist);
 }
 
 function EditorRegistry::addObject(%group, %name, %kind, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7) {
@@ -45,7 +45,7 @@ function EditorRegistry::clearGroup(%group) {
 
 function EditorRegistry::clear() {
 	%groupArr = EditorRegistry::groups();
-	ado(EditorRegistry::clearGroup, %groupArr);
+	ado(%groupArr, EditorRegistry::clearGroup);
 	adel(%groupArr);
 }
 
@@ -53,8 +53,8 @@ function EditorRegistry::clear() {
 function EditorRegistry::getArglist(%group, %name) {
 	%namesArr = EditorRegistry::groupNames(%group);
 	%arglistsArr = EditorRegistry::groupArglists(%group);
-	if ((%idx = afind(%name, %namesArr)) == -1) return ""; // %group/%name not valid
-	return aget(%idx, %arglistsArr);
+	if ((%idx = afind(%namesArr, %name)) == -1) return ""; // %group/%name not valid
+	return aget(%arglistsArr, %idx);
 }
 
 //
