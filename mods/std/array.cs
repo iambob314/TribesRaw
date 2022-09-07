@@ -32,20 +32,23 @@
 // * afirst()     : first element
 // * alast()      : last element
 //
+// * asetlen(%l)  : resize to length (pad with "" or truncate)
+// * aeq(%b)      : check if equal to array %b
 // * acopy(%b)    : append array's elements to other array %b
 // * acompact()   : shift non-"" elements left to replace "" elements
 // * asort()      : sort array
 //
-// * aitfirst()         : start iteration, return first
-// * aitnext()          : continue iteration, return next
-// * aitdone()          : is iteration done?
-// * ait()              : iteration next index
-// * ado(%f,%a,...)     : iterate %a, call %f with ... args followed by the element
-//                        (NOTE: %a arg precedes ... args, not last as usual)
-// * ado2(%f,%k,%a,...) : iterate %a, call %f with ... args but replace %k'th arg with the element
-//                        (NOTE: %a arg precedes ... args, not last as usual)
+// * aitfirst()          : start iteration, return first
+// * aitnext()           : continue iteration, return next
+// * aitdone()           : is iteration done?
+// * ait()               : iteration next index
+// * ado(%f,%a,...)      : for each %v, call %f(...,%v)
+//                         (NOTE: %a arg precedes ... args, not last as usual)
+// * ado2(%f,%k,%a,...)  : for each %v, call %f(...,%v) but replace %k'th arg with %v
+//                         (NOTE: %a arg precedes ... args, not last as usual)
+// * amap(%f,%a,...)     : replace each %v with %f(...,%v)'s return
+// * amap2(%f,%k,%a,...) : replace each %v with %f(...)'s return but replace %k'th arg with %v
 //
-// * aeq(%b) : check if equal to array %b
 //
 // Destructors (args as above):
 // * adel()      : delete array (release all memory)
@@ -162,82 +165,27 @@ function afind(%v, %a) {
 
 
 
-// aitfirst starts a new iteration on an array and returns the first value
-// Note: only one iteration may be active on an array at a time; code iterating should
-//       be careful that a called function does not inadvertently clobber the iterator.
-function aitfirst(%a) {
-	achk(%a);
-	$_a_[%a, ""] = "";
-	return aitval(%a);
-}
-
-// aitnext advances an array's iterator and returns the new value (no-op if iteration is done)
-function aitnext(%a) {
-	achk(%a);
-	if (aitdone(%a)) return "";
-	$_a_[%a, ""]++;
-	return aitval(%a);
-}
-
-// aitdone returns true iff after aitfirst/aitnext has stepped past the end of the iterator
-function aitdone(%a) { achk(%a); return ait(%a) == alen(%a); }
-
-// ait returns current index of the active iterator (or 0 if none active)
-function ait(%a) { achk(%a); return def($_a_[%a, ""], 0); }
-
-// aitval returns current element of the active iterator (or "" if none active)
-function aitval(%a) {
-	achk(%a);
-	if (aitdone(%a)) return "";
-	return aget(ait(%a), %a);
-}
-
-// ado iterates over an array, calling %f(%a0, %a1, ..., %v) for each element %v
-function ado(%f, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
-	achk(%a);
-	%insertIdx = 0;
-	for (%i = 0; %i < 10; %i++) {
-		if (%a[%i] != "") { %insertIdx = %i+1; }
-	}
-	assert(%insertIdx < 10, "ado overflow");
-	ado2(%f, %insertIdx, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9);
-}
-
-// ado iterates over an array, calling %f(%a0, %a1, ...) with %a[%k] replaced with %v for
-// each element %v
-function ado2(%f, %k, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
-	achk(%a);
-	for (%v = aitfirst(%a); !aitdone(%a); %v = aitnext(%a)) {
-		%a[%k] = %v;
-		invoke(%f, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9);
-	}
-}
-
+// aeq tests if array %a and %b have identical contents.
 function aeq(%b, %a) {
-	achk(%a);
+	achk(%a); achk(%b);
+	if (%a == %b) return true; // same array
 	if ((%l = alen(%a)) != alen(%b)) return false;
 	for (%i = 0; %i < %l; %i++)
 		if (aget(%i, %a) != aget(%i, %b)) return false;
 	return true;
 }
 
-
-
-// adel deletes an entire array
-function adel(%a) {
+// asetlen adjusts array %a's length to %l, truncating or extending with "" values as needed.
+// No elements at indices below %l are affected.
+// asetlen(alen(%a), %a) is a no-op.
+function asetlen(%l, %a) {
 	achk(%a);
-	%l = alen(%a);
-	for (%i = 0; %i < %l; %i++) $_a_[%a, %i] = "";
-	$_a_[%a, ""] = "";
-	$_a_[%a] = "";
-}
-
-// adellater deletes an entire array on schedule(..., 0) and returns the array (which is still
-// valid until the current call stack returns).
-function adellater(%a) {
-	achk(%a);
-	schedule("adel(" @ %a @ ");", 0);
-	return %a;
+	%l = %l | 0; // integerify len
+	%ol = alen(%a);
+	%from = min(%ol, %l);
+	%to = max(%ol, %l);
+	for (%i = %from; %i < %to; %i++) $_a_[%a, %i] = ""; // clear added/removed elements
+	$_a_[%a] = %l;
 }
 
 // acopy appends all elements of array %a to array %b.
@@ -284,6 +232,101 @@ function asubsort(%i, %j, %a) {
 	asubsort(%i, %pi, %a);
 	asubsort(%pi+1, %j, %a);
 }
+
+
+
+// aitfirst starts a new iteration on an array and returns the first value
+// Note: only one iteration may be active on an array at a time; code iterating should
+//       be careful that a called function does not inadvertently clobber the iterator.
+function aitfirst(%a) {
+	achk(%a);
+	$_a_[%a, ""] = "";
+	return aitval(%a);
+}
+
+// aitnext advances an array's iterator and returns the new value (no-op if iteration is done)
+function aitnext(%a) {
+	achk(%a);
+	if (aitdone(%a)) return "";
+	$_a_[%a, ""]++;
+	return aitval(%a);
+}
+
+// aitdone returns true iff after aitfirst/aitnext has stepped past the end of the iterator
+function aitdone(%a) { achk(%a); return ait(%a) == alen(%a); }
+
+// ait returns current index of the active iterator (or 0 if none active)
+function ait(%a) { achk(%a); return def($_a_[%a, ""], 0); }
+
+// aitval returns current element of the active iterator (or "" if none active)
+function aitval(%a) {
+	achk(%a);
+	if (aitdone(%a)) return "";
+	return aget(ait(%a), %a);
+}
+
+// ado iterates over an array, calling %f(%a0, %a1, ..., %v) for each element %v
+function ado(%f, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
+	achk(%a);
+	%k = 0;
+	for (%i = 0; %i < 10; %i++) {
+		if (%a[%i] != "") { %k = %i+1; }
+	}
+	assert(%k < 10, "ado overflow");
+	ado2(%f, %k, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9);
+}
+
+// ado iterates over an array, calling %f(%a0, %a1, ...) with %a[%k] replaced with %v for
+// each element %v
+function ado2(%f, %k, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
+	achk(%a);
+	for (%v = aitfirst(%a); !aitdone(%a); %v = aitnext(%a)) {
+		%a[%k] = %v;
+		invoke(%f, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9);
+	}
+}
+
+// amap replaces each value %v with the return from a call to %f(%a0, %a1, ..., %v)
+function amap(%f, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
+	achk(%a);
+	%k = 0;
+	for (%i = 0; %i < 10; %i++) {
+		if (%a[%i] != "") { %k = %i+1; }
+	}
+	assert(%k < 10, "amap overflow");
+	amap2(%f, %k, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9);
+}
+
+// amap2 replaces each value %v with the return from a call to %f(%a0, %a1, ...) with %a[%k]
+// replaced by %v
+function amap2(%f, %k, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
+	achk(%a);
+	%l = alen(%a);
+	for (%i = 0; %i < %l; %i++) {
+		%a[%k] = aget(%i, %a);
+		%v = invoke(%f, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9);
+		aset(%i, %v, %a);
+	}
+}
+
+
+// adel deletes an entire array
+function adel(%a) {
+	achk(%a);
+	%l = alen(%a);
+	for (%i = 0; %i < %l; %i++) $_a_[%a, %i] = "";
+	$_a_[%a, ""] = "";
+	$_a_[%a] = "";
+}
+
+// adellater deletes an entire array on schedule(..., 0) and returns the array (which is still
+// valid until the current call stack returns).
+function adellater(%a) {
+	achk(%a);
+	schedule("adel(" @ %a @ ");", 0);
+	return %a;
+}
+
 
 
 //
