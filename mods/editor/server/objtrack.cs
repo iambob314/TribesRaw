@@ -37,11 +37,17 @@ function ObjTracker::check(%obj) {
 	return "";
 }
 
+//
+// Conversion functions
+//
+
+// ObjTracker::toVObj returns the versioned object for an object ID, or "" if object non-existent.
 function ObjTracker::toVObj(%obj) {
 	if ((%v = ObjTracker::add(%obj)) == "") return "";
 	return %obj @ " " @ %v;
 }
 
+// ObjTracker::fromVObj returns the object ID for a versioned object, or "" if object invalidated.
 function ObjTracker::fromVObj(%vobj) {
 	%obj = getWord(%vobj, 0);
 	%v = getWord(%vobj, 1);
@@ -75,12 +81,12 @@ function ObjTracker::fromVObjs(%vobjArr, %objArr) {
 // ObjTracker::pruneVObjs updates a "versioned object" array, removing invalidated objects.
 // It only consiers first two words of each version object; any extra data is preserved.
 function ObjTracker::pruneVObjs(%vobjArr) {
-	for (%vobj = aitfirst(%vobjArr); !aitdone(%vobjArr); %vobj = aitnext(%vobjArr)) {
-		if (ObjTracker::fromVObj(%vobj) == "") {
-			aclr(ait(%vobjArr), %vobjArr);
-			%updated = true;
-		}
+	%l = alen(%vobjArr);
+	for (%i = %nl = 0; %i < %l; %i++) {
+		%vobj = aget(%i, %vobjArr);
+		if (ObjTracker::fromVObj(%vobj) == "") continue;
+		aset(%nl, %vobj, %vobjArr);
 	}
-	if (%updated) acompact(%vobjArr);
+	asetlen(%nl, %vobjArr);
 	return %vobjArr;
 }
