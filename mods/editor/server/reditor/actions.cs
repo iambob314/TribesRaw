@@ -79,13 +79,37 @@ function REditor::action::create::cleanup(%c, %arglist) {}
 // Move object action
 //
 function REditor::action::move::make(%c, %objArr, %dpos, %drot) {
+	%l = alen(%objArr);
+	
+	%multiRot = (%drot != "" && %l > 1);
+	if (%multiRot) {
+		if (getWord(%drot, 0) != 0 || getWord(%drot, 1) != 0) {
+			REditor::msgErr(%c, "cannot multi-rot except around Z axis");
+			return "";
+		}
+		%dpos = "0 0 0"; // since we're translating due to multi-rot, turn on translation
+	}
+	
+	if (%dpos != "") {
+		%posArr = amap(atmp(), %objArr, GameBase::getPosition);
+		%posArr = amap(%posArr, %posArr, Vector::add, %dpos);
+	}
+	if (%drot != "") {
+		%rotArr = amap(atmp(), %objArr, GameBase::getRotation);
+		%rotArr = amap(%rotArr, %rotArr, Vector::add, %drot);
+	}
+	if (%multiRot) {
+		%centroid = Editor::centroid(%posArr);
+		%dzrot = getWord(%drot, 2);
+		%posArr = Editor::rotateZAbout(%posArr, %posArr, %centroid, %dzrot);
+	}
+
 	%moveArr = anew();
-	for (%obj = aitfirst(%objArr); !aitdone(%objArr); %obj = aitnext(%objArr)) {
-		%pos = GameBase::getPosition(%obj);
-		%rot = GameBase::getRotation(%obj);
-		%newPos = tern(%dpos != "", Vector::add(%pos, %dpos), "X X X");
-		%newRot = tern(%drot != "", Vector::add(%rot, %drot), "X X X");
-		
+	%newPos = %newRot = "X X X"; // placeholder for "no trans/rotation"
+	for (%i = 0; %i < %l; %i++) {
+		%obj = aget(%objArr, %i);
+		if (%dpos != "") %newPos = aget(%posArr, %i);
+		if (%drot != "") %newRot = aget(%rotArr, %i);
 		%move = ObjTracker::toVObj(%obj) @ " " @ %newPos @ " " @ %newRot;
 		apush(%moveArr, %move);
 	}
@@ -98,7 +122,6 @@ function REditor::action::move::do(%c, %moveArr, %prevAction) {
 	
 	if (%makeInv) %invMoveArr = anew();
 	for (%move = aitfirst(%moveArr); !aitdone(%moveArr); %move = aitnext(%moveArr)) {
-		echos("WOW", %move);
 		if ((%obj = ObjTracker::fromVObj(%move)) == "") continue;
 
 		%newPos = getWord(%move, 2) @ " " @ getWord(%move, 3) @ " " @ getWord(%move, 4);

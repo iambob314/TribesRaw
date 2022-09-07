@@ -7,6 +7,8 @@
 //
 
 exec("editor\\server\\objtrack.cs");
+exec("editor\\server\\util.cs");
+
 exec("editor\\server\\remotes.cs");
 exec("editor\\server\\reditor\\reditor.cs");
 
