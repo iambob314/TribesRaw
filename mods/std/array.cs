@@ -46,9 +46,12 @@
 //                         (NOTE: %a arg precedes ... args, not last as usual)
 // * ado2(%f,%k,%a,...)  : for each %v, call %f(...,%v) but replace %k'th arg with %v
 //                         (NOTE: %a arg precedes ... args, not last as usual)
-// * amap(%f,%a,...)     : replace each %v with %f(...,%v)'s return
-// * amap2(%f,%k,%a,...) : replace each %v with %f(...)'s return but replace %k'th arg with %v
 //
+// * amap(%f,%b,%a,...)     : fill %b with values %f(...,%v) for each %v in %a (%a, %b may be same)
+// * amap2(%f,%k,%b,%a,...) : fill %b with values %f(...) (but replace %k'th arg with %v) for each
+//                            %v in %a (%a, %b may be same)
+// * areduce(%f,%a)         : reduce all %v to %r using %r = f(%r, %v)
+//                            (or "" if 0-length or first value if 1-length)
 //
 // Destructors (args as above):
 // * adel()      : delete array (release all memory)
@@ -286,28 +289,45 @@ function ado2(%f, %k, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
 	}
 }
 
-// amap replaces each value %v with the return from a call to %f(%a0, %a1, ..., %v)
-function amap(%f, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
+// amap populates array %b with values %f(%a0, %a1, ..., %v) for each value %v in array %a.
+// If %a == %b, this transforms %a in-place.
+function amap(%f, %b, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
 	achk(%a);
 	%k = 0;
 	for (%i = 0; %i < 10; %i++) {
 		if (%a[%i] != "") { %k = %i+1; }
 	}
 	assert(%k < 10, "amap overflow");
-	amap2(%f, %k, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9);
+	amap2(%f, %k, %b, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9);
 }
 
-// amap2 replaces each value %v with the return from a call to %f(%a0, %a1, ...) with %a[%k]
-// replaced by %v
-function amap2(%f, %k, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
-	achk(%a);
+// amap2 populates array %b with values %f(%a0, %a1, ...) (except with %a[%k] replaced by %v)
+// for each value %v in array %a.
+// If %a == %b, this transforms %a in-place.
+function amap2(%f, %k, %b, %a, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9) {
+	achk(%a); achk(%b);
 	%l = alen(%a);
+	asetlen(%l, %b); // prepare %b (no-op if %a == %b)
 	for (%i = 0; %i < %l; %i++) {
 		%a[%k] = aget(%i, %a);
 		%v = invoke(%f, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9);
-		aset(%i, %v, %a);
+		aset(%i, %v, %b);
 	}
 }
+
+// areduce returns the result of applying %f(%v1, %v2) as a reduction to array %a.
+// If %a has length >2, it applies %f to the first two elements, then repeatedly applies
+// %f to the previous result and the next element, and returns the final result.
+// If %a has length 1, it returns the single element.
+// If %a has length 0, it returns "".
+function areduce(%f, %a) {
+	if ((%l = alen(%a)) == 0) return "";
+	%v = aget(0, %a);
+	for (%i = 1; %i < %l; %i++)
+		%v = invoke(%f, %v, aget(%i, %a));
+	return %v;
+}
+
 
 
 // adel deletes an entire array
