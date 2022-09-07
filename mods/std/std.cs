@@ -1,6 +1,7 @@
 exec("std\\array.cs");  
 exec("std\\group.cs"); 
 exec("std\\math.cs"); 
+exec("std\\matrix.cs"); 
 exec("std\\string.cs"); 
 exec("std\\util.cs");  
 exec("std\\vector.cs");
